@@ -1,7 +1,3 @@
-
-
-
-
 package Principal;
 
 import Controlador.ControlLogin;

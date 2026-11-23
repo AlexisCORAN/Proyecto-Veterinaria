@@ -1,32 +1,25 @@
-
 package EstructuraArrayList;
 
 import Entidades.Servicio;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-
 public class ListaServicios implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
     private ArrayList<Servicio> servicios;
 
     public ListaServicios() {
-        servicios = new ArrayList<>();
-    }
+        servicios = new ArrayList<>();}
 
     public void Insertar(Servicio servicio) {
-        servicios.add(servicio);
-    }
+        servicios.add(servicio);}
 
     public Servicio Buscar(String codServicio) {
         for (int i = 0; i < servicios.size(); i++) {
             if (servicios.get(i).getCodServicio().equalsIgnoreCase(codServicio)) {
                 return servicios.get(i);
             }
-        }
-        return null;
+        } return null;
     }
 
     public boolean Eliminar(String codServicio) {
@@ -34,8 +27,7 @@ public class ListaServicios implements Serializable {
         if (servicio != null) {
             servicios.remove(servicio);
             return true;
-        }
-        return false;
+        } return false;
     }
 
     public boolean Desactivar(String codServicio) {
@@ -48,10 +40,8 @@ public class ListaServicios implements Serializable {
     }
 
     public int Cantidad() {
-        return servicios.size();
-    }
+        return servicios.size();}
 
     public ArrayList<Servicio> getServicios() {
-        return servicios;
-    }
+        return servicios;}
 }
