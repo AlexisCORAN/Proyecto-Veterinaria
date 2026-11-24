@@ -1,7 +1,3 @@
-
-
-
-
 package Controlador;
 
 import Entidades.Cliente;
@@ -20,7 +16,6 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-
 
 public class ControlCliente implements ActionListener {
 

@@ -1,7 +1,3 @@
-
-
-
-
 package Controlador;
 
 import Arreglos.ArregloUsuarios;

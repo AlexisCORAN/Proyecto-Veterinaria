@@ -1,13 +1,9 @@
-
 package Arboles;
 
 import Entidades.Cita;
 
-
 public class ArbolCitas {
-    
     public NodoCitaArbol raiz;
-
     public ArbolCitas() {
         this.raiz = null;
     }
@@ -17,24 +13,18 @@ public class ArbolCitas {
     }
 
     private NodoCitaArbol InsertarRecursivo(NodoCitaArbol nodo, Cita cita) {
-        if (nodo == null) {
-            return new NodoCitaArbol(cita);
-        }
+        if (nodo == null) { return new NodoCitaArbol(cita); }
         
         if (cita.getCodCita().compareToIgnoreCase(nodo.cita.getCodCita()) < 0) {
             nodo.izq = InsertarRecursivo(nodo.izq, cita);
         } else if (cita.getCodCita().compareToIgnoreCase(nodo.cita.getCodCita()) > 0) {
             nodo.der = InsertarRecursivo(nodo.der, cita);
-        }
-        
-        return nodo;
+        } return nodo;
     }
 
     public Cita Buscar(String codigo) {
         NodoCitaArbol resultado = BuscarRecursivo(raiz, codigo);
-        if (resultado != null) {
-            return resultado.cita;
-        }
+        if (resultado != null) { return resultado.cita; }
         return null;
     }
 

@@ -18,7 +18,6 @@ public class frmLogin extends javax.swing.JFrame {
     public frmLogin() {
         initComponents();
     }
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -27,7 +26,6 @@ public class frmLogin extends javax.swing.JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        java.awt.GridBagConstraints gridBagConstraints;
 
         pnlContenedor = new javax.swing.JPanel();
         txtUsuario = new javax.swing.JTextField();
@@ -35,54 +33,49 @@ public class frmLogin extends javax.swing.JFrame {
         btnIngresar = new javax.swing.JButton();
         lblUsuario = new javax.swing.JLabel();
         lblContraseña = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(940, 600));
         setPreferredSize(new java.awt.Dimension(940, 600));
 
-        pnlContenedor.setLayout(new java.awt.GridBagLayout());
+        pnlContenedor.setBackground(new java.awt.Color(255, 255, 255));
+        pnlContenedor.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         txtUsuario.setPreferredSize(new java.awt.Dimension(150, 35));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.insets = new java.awt.Insets(20, 0, 20, 0);
-        pnlContenedor.add(txtUsuario, gridBagConstraints);
+        pnlContenedor.add(txtUsuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 340, 170, 40));
 
         txtPassword.setPreferredSize(new java.awt.Dimension(150, 35));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.ipady = 5;
-        gridBagConstraints.insets = new java.awt.Insets(20, 0, 20, 0);
-        pnlContenedor.add(txtPassword, gridBagConstraints);
+        pnlContenedor.add(txtPassword, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 430, 170, 40));
 
+        btnIngresar.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        btnIngresar.setForeground(new java.awt.Color(41, 128, 185));
         btnIngresar.setText("Ingresar");
         btnIngresar.setPreferredSize(new java.awt.Dimension(150, 35));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-        pnlContenedor.add(btnIngresar, gridBagConstraints);
+        pnlContenedor.add(btnIngresar, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 480, 170, 40));
 
+        lblUsuario.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblUsuario.setForeground(new java.awt.Color(41, 128, 185));
         lblUsuario.setText("Usuario");
         lblUsuario.setMinimumSize(new java.awt.Dimension(100, 35));
         lblUsuario.setPreferredSize(new java.awt.Dimension(100, 35));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        pnlContenedor.add(lblUsuario, gridBagConstraints);
+        pnlContenedor.add(lblUsuario, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 310, -1, -1));
 
+        lblContraseña.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        lblContraseña.setForeground(new java.awt.Color(41, 128, 185));
         lblContraseña.setText("Contraseña");
         lblContraseña.setMinimumSize(new java.awt.Dimension(100, 35));
         lblContraseña.setPreferredSize(new java.awt.Dimension(100, 35));
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 1;
-        pnlContenedor.add(lblContraseña, gridBagConstraints);
+        pnlContenedor.add(lblContraseña, new org.netbeans.lib.awtextra.AbsoluteConstraints(350, 390, -1, -1));
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel2.setForeground(new java.awt.Color(41, 128, 185));
+        jLabel2.setText("Sistema de Gestión Veterinaria");
+        pnlContenedor.add(jLabel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(340, 290, -1, -1));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Vista/logo.png"))); // NOI18N
+        pnlContenedor.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(310, 30, -1, -1));
 
         getContentPane().add(pnlContenedor, java.awt.BorderLayout.CENTER);
 
@@ -116,6 +109,8 @@ public class frmLogin extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnIngresar;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel lblContraseña;
     private javax.swing.JLabel lblUsuario;
     private javax.swing.JPanel pnlContenedor;

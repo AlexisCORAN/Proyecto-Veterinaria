@@ -1,7 +1,3 @@
-
-
-
-
 package Controlador;
 import Vista.*;
 import java.awt.CardLayout;
