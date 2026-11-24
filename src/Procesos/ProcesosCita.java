@@ -43,7 +43,7 @@ public class ProcesosCita {
 
     public static Cita registrar(String fecha, String hora, Mascota mascota, Personal personal,
             List<Servicio> servicios, ListaClientes clientes, ColaCitas pendientes, PilaCitas historial) {
-        if (!mascota.isActivo()) {
+        if (mascota == null || !mascota.isActivo()) {
             throw new IllegalArgumentException("Seleccione una mascota activa.");
         }
         validarPersonal(personal);
@@ -54,7 +54,7 @@ public class ProcesosCita {
         validarDisponibilidad(pendientes, fecha, hora, mascota.getCodMascota(),
                 personal.getCodPersonal(), null);
 
-        Cita cita = new Cita(siguienteCodigo(pendientes, historial), fecha, hora,
+        Cita cita = new Cita(siguienteCodigo(pendientes, historial), fecha.trim(), hora.trim(),
                 mascota.getCodMascota(), personal.getCodPersonal(), codigos.get(0));
         cita.setCodigosServicios(codigos);
         cita.setTotal(total);
@@ -64,6 +64,9 @@ public class ProcesosCita {
 
     public static void editar(Cita cita, String fecha, String hora, Personal personal,
             List<Servicio> servicios, ColaCitas pendientes) {
+        if (cita == null) {
+            throw new IllegalArgumentException("Seleccione una cita válida.");
+        }
         if (!ESTADO_PENDIENTE.equalsIgnoreCase(cita.getEstado())) {
             throw new IllegalArgumentException("Solo se pueden editar citas en estado Pendiente.");
         }
@@ -74,8 +77,8 @@ public class ProcesosCita {
         validarDisponibilidad(pendientes, fecha, hora, cita.getCodMascota(),
                 personal.getCodPersonal(), cita.getCodCita());
 
-        cita.setFecha(fecha);
-        cita.setHora(hora);
+        cita.setFecha(fecha.trim());
+        cita.setHora(hora.trim());
         cita.setCodPersonal(personal.getCodPersonal());
         cita.setCodigosServicios(codigos);
         cita.setTotal(total);
@@ -128,7 +131,7 @@ public class ProcesosCita {
         Set<String> vistos = new HashSet<>();
         double total = 0;
         for (Servicio servicio : servicios) {
-            if (!servicio.isActivo()) {
+            if (servicio == null || !servicio.isActivo()) {
                 throw new IllegalArgumentException("Seleccione únicamente servicios activos.");
             }
             if (!vistos.add(servicio.getCodServicio().toLowerCase(Locale.ROOT))) {
@@ -202,5 +205,4 @@ public class ProcesosCita {
         }
         return GeneradorCodigos.Siguiente("CIT-", codigos);
     }
-
 }

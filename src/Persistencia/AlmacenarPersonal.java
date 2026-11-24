@@ -1,4 +1,3 @@
-
 package Persistencia;
 
 import ListasDoblesEnlazadas.ListaPersonal;
@@ -8,8 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class AlmacenarPersonal {
 
@@ -22,14 +21,10 @@ public class AlmacenarPersonal {
 
         try (FileOutputStream fos = new FileOutputStream(fileTmp);
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-             
             oos.writeObject(lista);
         }
-        if (fileOriginal.exists()) {
-            fileOriginal.delete();
-        }
-        
-        fileTmp.renameTo(fileOriginal); 
+
+        Files.move(fileTmp.toPath(), fileOriginal.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static ListaPersonal Recuperar() throws IOException, ClassNotFoundException {
@@ -41,7 +36,6 @@ public class AlmacenarPersonal {
 
         try (FileInputStream fis = new FileInputStream(archivo);
              ObjectInputStream ois = new ObjectInputStream(fis)) {
-             
             return (ListaPersonal) ois.readObject();
         }
     }

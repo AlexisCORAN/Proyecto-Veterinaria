@@ -536,7 +536,7 @@
                     <Property name="axis" type="int" value="0"/>
                   </Layout>
                   <SubComponents>
-                    <Component class="javax.swing.JLabel" name="lblCodigoCliente1">
+                    <Component class="javax.swing.JLabel" name="txtPropietario">
                       <Properties>
                         <Property name="text" type="java.lang.String" value="Propietario"/>
                         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">

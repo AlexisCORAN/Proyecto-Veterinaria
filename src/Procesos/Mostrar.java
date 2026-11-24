@@ -51,9 +51,9 @@ public class Mostrar {
         if (filtro.isEmpty()) {
             return true;
         }
-        String nombreCompleto = (c.getNombres() + " " + c.getApellidos()).toLowerCase();
-        return c.getCodCliente().toLowerCase().contains(filtro)
-                || c.getDni().toLowerCase().contains(filtro)
+        String nombreCompleto = (textoSeguro(c.getNombres()) + " " + textoSeguro(c.getApellidos())).toLowerCase();
+        return textoSeguro(c.getCodCliente()).toLowerCase().contains(filtro)
+                || textoSeguro(c.getDni()).toLowerCase().contains(filtro)
                 || nombreCompleto.contains(filtro);
     }
 
@@ -75,11 +75,11 @@ public class Mostrar {
         if (filtro.isEmpty()) {
             return true;
         }
-        String nombreCompleto = (p.getNombres() + " " + p.getApellidos()).toLowerCase();
-        return p.getCodPersonal().toLowerCase().contains(filtro)
-                || p.getDni().toLowerCase().contains(filtro)
+        String nombreCompleto = (textoSeguro(p.getNombres()) + " " + textoSeguro(p.getApellidos())).toLowerCase();
+        return textoSeguro(p.getCodPersonal()).toLowerCase().contains(filtro)
+                || textoSeguro(p.getDni()).toLowerCase().contains(filtro)
                 || nombreCompleto.contains(filtro)
-                || p.getCargo().toLowerCase().contains(filtro);
+                || textoSeguro(p.getCargo()).toLowerCase().contains(filtro);
     }
 
     public static void DatosMascotas(JTable tabla, ListaMascotas lista, String estado, String textoBusqueda) {
@@ -100,9 +100,9 @@ public class Mostrar {
         if (filtro.isEmpty()) {
             return true;
         }
-        return m.getCodMascota().toLowerCase().contains(filtro)
-                || m.getNombre().toLowerCase().contains(filtro)
-                || m.getCodCliente().toLowerCase().contains(filtro);
+        return textoSeguro(m.getCodMascota()).toLowerCase().contains(filtro)
+                || textoSeguro(m.getNombre()).toLowerCase().contains(filtro)
+                || textoSeguro(m.getCodCliente()).toLowerCase().contains(filtro);
     }
 
     public static void DatosServicios(JTable tabla, ListaServicios lista, String estado, String textoBusqueda) {
@@ -122,9 +122,9 @@ public class Mostrar {
         if (filtro.isEmpty()) {
             return true;
         }
-        return s.getCodServicio().toLowerCase().contains(filtro)
-                || s.getNombre().toLowerCase().contains(filtro)
-                || s.getDescripcion().toLowerCase().contains(filtro);
+        return textoSeguro(s.getCodServicio()).toLowerCase().contains(filtro)
+                || textoSeguro(s.getNombre()).toLowerCase().contains(filtro)
+                || textoSeguro(s.getDescripcion()).toLowerCase().contains(filtro);
     }
 
     public static void DatosCitas(JTable tabla, ColaCitas pendientes, PilaCitas historial,
@@ -156,7 +156,7 @@ public class Mostrar {
     }
 
     private static boolean coincideEstadoCita(String filtroEstado, Cita c) {
-        String estadoCita = c.getEstado() == null ? "" : c.getEstado().trim();
+        String estadoCita = textoSeguro(c.getEstado());
         return "TODOS".equalsIgnoreCase(filtroEstado)
                 || ("ATENDIDAS".equalsIgnoreCase(filtroEstado) && estadoCita.equalsIgnoreCase("Atendida"))
                 || ("CANCELADAS".equalsIgnoreCase(filtroEstado) && estadoCita.equalsIgnoreCase("Cancelada"));
@@ -166,8 +166,8 @@ public class Mostrar {
         if (filtro.isEmpty()) {
             return true;
         }
-        return c.getCodCita().toLowerCase().contains(filtro)
-                || c.getCodMascota().toLowerCase().contains(filtro);
+        return textoSeguro(c.getCodCita()).toLowerCase().contains(filtro)
+                || textoSeguro(c.getCodMascota()).toLowerCase().contains(filtro);
     }
 
     private static Object[] filaCita(Cita c) {
@@ -177,6 +177,10 @@ public class Mostrar {
 
     private static String normalizarFiltro(String texto) {
         return texto == null ? "" : texto.trim().toLowerCase();
+    }
+
+    private static String textoSeguro(String texto) {
+        return texto == null ? "" : texto.trim();
     }
 
     private static boolean coincideEstado(String estado, boolean activo) {

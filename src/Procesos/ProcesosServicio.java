@@ -35,6 +35,7 @@ public class ProcesosServicio {
 
     public static void registrar(ListaServicios lista, Servicio nuevo) {
         validar(nuevo);
+        copiarDatos(nuevo, nuevo);
         if (buscarPorNombre(lista, nuevo.getNombre()) != null) {
             throw new IllegalArgumentException("Ya existe un servicio registrado con ese nombre.");
         }
@@ -57,7 +58,7 @@ public class ProcesosServicio {
     }
 
     public static boolean desactivar(ListaServicios lista, Servicio servicio) {
-        return servicio.isActivo() && lista.Desactivar(servicio.getCodServicio());
+        return servicio != null && servicio.isActivo() && lista.Desactivar(servicio.getCodServicio());
     }
 
     private static Servicio buscarPorNombre(ListaServicios lista, String nombre) {
@@ -86,4 +87,4 @@ public class ProcesosServicio {
     private static String textoSeguro(String valor) {
         return valor == null ? "" : valor.trim();
     }
-}
+}   

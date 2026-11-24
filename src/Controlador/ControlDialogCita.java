@@ -113,7 +113,7 @@ public class ControlDialogCita implements ActionListener {
         }
 
         if (permitirEditar) {
-            vista.btnAgregar1.addActionListener(this);
+            vista.btnAgregar.addActionListener(this);
             vista.btnQuitar.addActionListener(this);
             vista.btnGuardar.addActionListener(this);
         }
@@ -228,7 +228,7 @@ public class ControlDialogCita implements ActionListener {
         vista.spinHora.setEnabled(esEditable);
         vista.cboPersonal.setEnabled(esEditable);
         vista.cboServicios.setVisible(esEditable);
-        vista.btnAgregar1.setVisible(esEditable);
+        vista.btnAgregar.setVisible(esEditable);
         vista.btnQuitar.setVisible(esEditable);
         vista.btnGuardar.setVisible(esEditable);
         vista.btnCancelar.setText(esEditable ? "Cancelar" : "Cerrar");
@@ -422,7 +422,7 @@ public class ControlDialogCita implements ActionListener {
             vista.dispose();
         } else if (origen == vista.btnBuscarMascota || origen == vista.txtBuscarMascota) {
             buscarMascota();
-        } else if (origen == vista.btnAgregar1) {
+        } else if (origen == vista.btnAgregar) {
             agregarServicio();
         } else if (origen == vista.btnQuitar) {
             quitarServicio();

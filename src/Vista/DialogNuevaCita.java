@@ -75,7 +75,7 @@ public class DialogNuevaCita extends javax.swing.JDialog {
         filler14 = new javax.swing.Box.Filler(new java.awt.Dimension(20, 0), new java.awt.Dimension(20, 0), new java.awt.Dimension(20, 0));
         btnQuitar = new javax.swing.JButton();
         filler15 = new javax.swing.Box.Filler(new java.awt.Dimension(20, 0), new java.awt.Dimension(20, 0), new java.awt.Dimension(20, 0));
-        btnAgregar1 = new javax.swing.JButton();
+        btnAgregar = new javax.swing.JButton();
         panelInferior = new javax.swing.JPanel();
         btnCancelar = new javax.swing.JButton();
         filler7 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
@@ -89,7 +89,6 @@ public class DialogNuevaCita extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(1000, 700));
         setModal(true);
-        setPreferredSize(new java.awt.Dimension(1000, 700));
 
         panelPrincipal.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panelPrincipal.setLayout(new java.awt.BorderLayout());
@@ -195,6 +194,8 @@ public class DialogNuevaCita extends javax.swing.JDialog {
         panelRowFecha.add(lblFechaCita);
         panelRowFecha.add(filler3);
 
+        spinFecha.setModel(new javax.swing.SpinnerDateModel());
+        spinFecha.setEditor(new javax.swing.JSpinner.DateEditor(spinFecha, "dd/MM/yyyy"));
         spinFecha.setMinimumSize(new java.awt.Dimension(250, 25));
         spinFecha.setPreferredSize(new java.awt.Dimension(250, 25));
         panelRowFecha.add(spinFecha);
@@ -212,6 +213,8 @@ public class DialogNuevaCita extends javax.swing.JDialog {
         panelRowhora.add(lblhora);
         panelRowhora.add(filler4);
 
+        spinHora.setModel(new javax.swing.SpinnerDateModel(new java.util.Date(), null, null, java.util.Calendar.MINUTE));
+        spinHora.setEditor(new javax.swing.JSpinner.DateEditor(spinHora, "HH:mm"));
         spinHora.setMinimumSize(new java.awt.Dimension(250, 25));
         spinHora.setPreferredSize(new java.awt.Dimension(250, 25));
         panelRowhora.add(spinHora);
@@ -303,18 +306,18 @@ public class DialogNuevaCita extends javax.swing.JDialog {
         panelBusqueda2.add(btnQuitar);
         panelBusqueda2.add(filler15);
 
-        btnAgregar1.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        btnAgregar1.setText("Agregar");
-        btnAgregar1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAgregar1.setMaximumSize(new java.awt.Dimension(140, 35));
-        btnAgregar1.setMinimumSize(new java.awt.Dimension(140, 35));
-        btnAgregar1.setPreferredSize(new java.awt.Dimension(140, 35));
-        btnAgregar1.addActionListener(new java.awt.event.ActionListener() {
+        btnAgregar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnAgregar.setText("Agregar");
+        btnAgregar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnAgregar.setMaximumSize(new java.awt.Dimension(140, 35));
+        btnAgregar.setMinimumSize(new java.awt.Dimension(140, 35));
+        btnAgregar.setPreferredSize(new java.awt.Dimension(140, 35));
+        btnAgregar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAgregar1ActionPerformed(evt);
+                btnAgregarActionPerformed(evt);
             }
         });
-        panelBusqueda2.add(btnAgregar1);
+        panelBusqueda2.add(btnAgregar);
 
         panelPrevServicios.add(panelBusqueda2, java.awt.BorderLayout.NORTH);
 
@@ -392,9 +395,9 @@ public class DialogNuevaCita extends javax.swing.JDialog {
 
     }//GEN-LAST:event_txtBuscarMascotaActionPerformed
 
-    private void btnAgregar1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregar1ActionPerformed
+    private void btnAgregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_btnAgregar1ActionPerformed
+    }//GEN-LAST:event_btnAgregarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -409,7 +412,7 @@ public class DialogNuevaCita extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton btnAgregar1;
+    public javax.swing.JButton btnAgregar;
     public javax.swing.JButton btnBuscarMascota;
     public javax.swing.JButton btnCancelar;
     public javax.swing.JButton btnGuardar;
@@ -436,7 +439,7 @@ public class DialogNuevaCita extends javax.swing.JDialog {
     public javax.swing.JLabel lblTotal;
     public javax.swing.JLabel lblVeterinario;
     public javax.swing.JLabel lblhora;
-    private javax.swing.JLabel nombrePanel;
+    public javax.swing.JLabel nombrePanel;
     private javax.swing.JPanel panelBusqueda;
     private javax.swing.JPanel panelBusqueda2;
     private javax.swing.JPanel panelCentral;

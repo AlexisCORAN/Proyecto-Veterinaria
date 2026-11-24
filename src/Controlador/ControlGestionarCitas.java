@@ -18,41 +18,61 @@ import Procesos.ProcesosCita;
 import Procesos.UtilidadesUI;
 import Vista.DialogAtenderCita;
 import Vista.DialogNuevaCita;
-import Vista.pnlCitas;
+import Vista.pnlGestionarCitas;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import javax.swing.DefaultComboBoxModel;
 
-public class ControlGestionCitas implements ActionListener {
+public class ControlGestionarCitas implements ActionListener {
 
-    private static final String PLACEHOLDER_BUSQUEDA = "Buscar por Código de cita o de mascota";
+    private static final String PLACEHOLDER_BUSQUEDA = "Buscar por Código de Cita o Mascota";
     private static final int COL_CODIGO = 0;
 
-    private final pnlCitas vista;
+    private final pnlGestionarCitas vista;
     private final RegistroCitas registro;
+    private final ListaClientes clientes;
+    private final ListaMascotas mascotas;
+    private final ListaPersonal personal;
+    private final ListaServicios servicios;
+    private ArbolCitas indiceCitas;
     private Cita citaSeleccionada;
-    private ArbolCitas indiceArbol;
     private boolean ordenAscendente = true;
 
-    public ControlGestionCitas(pnlCitas vista) throws IOException, ClassNotFoundException {
+    public ControlGestionarCitas(pnlGestionarCitas vista) throws IOException, ClassNotFoundException {
         this.vista = vista;
         this.registro = AlmacenarCitas.Recuperar();
+        this.clientes = AlmacenarCliente.Recuperar();
+        this.mascotas = AlmacenarMascota.Recuperar();
+        this.personal = AlmacenarPersonal.Recuperar();
+        this.servicios = AlmacenarServicio.Recuperar();
 
+        configurarFiltros();
         registrarEventos();
         actualizarVista();
     }
 
-    
-    
-    
+    private void configurarFiltros() {
+        vista.cboEstado.setModel(new DefaultComboBoxModel<>(new String[]{
+            "TODOS", "PENDIENTES", "ATENDIDAS", "CANCELADAS"
+        }));
+        actualizarTextoOrden();
+    }
+
+    private void actualizarTextoOrden() {
+        vista.btnOrdenarFecha.setText(ordenAscendente
+                ? "Orden: Más próximas primero"
+                : "Orden: Más recientes primero");
+    }
+
     private void registrarEventos() {
         vista.btnNuevo.addActionListener(this);
+        vista.btnAtenderCita.addActionListener(this);
+        vista.btnCancelar.addActionListener(this);
         vista.btnBuscar.addActionListener(this);
         vista.txtBuscar.addActionListener(this);
-        vista.btnCancelar.addActionListener(this);
-        vista.btnAtenderCita.addActionListener(this);
         vista.cboEstado.addActionListener(this);
         vista.btnOrdenarFecha.addActionListener(this);
 
@@ -60,7 +80,7 @@ public class ControlGestionCitas implements ActionListener {
 
         vista.tablaCitas.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                seleccionarDesdeTabla();
+                seleccionarCitaDeTabla();
             }
         });
 
@@ -73,34 +93,28 @@ public class ControlGestionCitas implements ActionListener {
                 int fila = vista.tablaCitas.rowAtPoint(e.getPoint());
                 if (fila >= 0) {
                     vista.tablaCitas.setRowSelectionInterval(fila, fila);
+                    seleccionarCitaDeTabla();
                     if (citaSeleccionada != null) {
-                        abrirDialogo(citaSeleccionada);
+                        abrirDialogoCita(citaSeleccionada);
                     }
                 }
             }
         });
-
-        actualizarTextoOrden();
     }
 
-    
-    
-    
     private void actualizarVista() {
+        indiceCitas = ProcesosCita.construirIndice(registro.getPendientes(), registro.getHistorial());
+        vista.tablaCitas.setToolTipText("Último movimiento: "
+                + ProcesosCita.ultimoMovimiento(registro.getHistorial())
+                + " | Doble clic en una fila para editar o ver detalle");
         UtilidadesUI.restablecerPlaceholder(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
-        indiceArbol = ProcesosCita.construirIndice(registro.getPendientes(), registro.getHistorial());
         cargarTabla("");
     }
 
     private void cargarTabla(String texto) {
         vista.tablaCitas.clearSelection();
-        Mostrar.DatosCitas(
-                vista.tablaCitas,
-                registro.getPendientes(),
-                registro.getHistorial(),
-                estadoSeleccionado(),
-                texto,
-                ordenAscendente);
+        Mostrar.DatosCitas(vista.tablaCitas, registro.getPendientes(), registro.getHistorial(),
+                estadoSeleccionado(), texto, ordenAscendente);
         citaSeleccionada = null;
         actualizarEstadoBotones();
     }
@@ -110,65 +124,75 @@ public class ControlGestionCitas implements ActionListener {
         return estado == null ? "TODOS" : estado.toString();
     }
 
-    private boolean esCitaPendienteSeleccionada() {
-        return citaSeleccionada != null
-                && ProcesosCita.ESTADO_PENDIENTE.equalsIgnoreCase(citaSeleccionada.getEstado());
-    }
-
     private void actualizarEstadoBotones() {
-        boolean esPendiente = esCitaPendienteSeleccionada();
+        boolean haySeleccion = citaSeleccionada != null;
+        boolean esPendiente = haySeleccion
+                && ProcesosCita.ESTADO_PENDIENTE.equalsIgnoreCase(citaSeleccionada.getEstado());
+
         vista.btnAtenderCita.setEnabled(esPendiente);
         vista.btnCancelar.setEnabled(esPendiente);
     }
 
-    private void seleccionarDesdeTabla() {
+    private void seleccionarCitaDeTabla() {
         int fila = vista.tablaCitas.getSelectedRow();
         if (fila < 0) {
             citaSeleccionada = null;
         } else {
             int filaModelo = vista.tablaCitas.convertRowIndexToModel(fila);
             String codigo = String.valueOf(vista.tablaCitas.getModel().getValueAt(filaModelo, COL_CODIGO));
-            citaSeleccionada = indiceArbol.Buscar(codigo);
+            citaSeleccionada = indiceCitas.Buscar(codigo);
         }
         actualizarEstadoBotones();
     }
 
-    
-    
-    
-    private void abrirDialogo(Cita cita) {
-        ListaClientes clientes;
-        ListaMascotas mascotas;
-        ListaPersonal personal;
-        ListaServicios servicios;
-        try {
-            clientes = AlmacenarCliente.Recuperar();
-            mascotas = AlmacenarMascota.Recuperar();
-            personal = AlmacenarPersonal.Recuperar();
-            servicios = AlmacenarServicio.Recuperar();
-        } catch (IOException | ClassNotFoundException ex) {
-            Mensajes.Mostrar("Error al cargar datos actualizados: " + ex.getMessage());
-            return;
-        }
-
+    private void abrirDialogoCita(Cita citaEdicion) {
         DialogNuevaCita dialogo = new DialogNuevaCita(UtilidadesUI.obtenerFramePadre(vista), true);
-        ControlDialogCita controlDialogo = new ControlDialogCita(
-                dialogo, registro, clientes, mascotas, personal, servicios, cita);
+        ControlDialogCita control = new ControlDialogCita(dialogo, registro, clientes,
+                mascotas, personal, servicios, citaEdicion);
         dialogo.setVisible(true);
 
-        if (controlDialogo.isGuardadoExitoso()) {
+        if (control.isGuardadoExitoso()) {
             actualizarVista();
-        }
-        if (cita != null) {
-            mostrarDiagnosticoSiExiste(cita);
         }
     }
 
-    private void mostrarDiagnosticoSiExiste(Cita cita) {
-        String detalles = cita.getDetallesAtencion();
-        if (ProcesosCita.ESTADO_ATENDIDA.equalsIgnoreCase(cita.getEstado())
-                && detalles != null && !detalles.isBlank()) {
-            Mensajes.Mostrar("Diagnóstico (" + cita.getCodCita() + "):\n\n" + detalles);
+    private void atenderCita() {
+        if (citaSeleccionada == null) {
+            return;
+        }
+        DialogAtenderCita dialogo = new DialogAtenderCita(UtilidadesUI.obtenerFramePadre(vista), true);
+        ControlDialogAtenderCita control = new ControlDialogAtenderCita(dialogo, registro, citaSeleccionada);
+        dialogo.setVisible(true);
+
+        if (control.isGuardadoExitoso()) {
+            actualizarVista();
+        }
+    }
+
+    private void cancelarCita() {
+        Cita cita = citaSeleccionada;
+        if (cita == null) {
+            return;
+        }
+        if (!Mensajes.Preguntar("Confirmar cancelación",
+                "¿Desea cancelar la cita " + cita.getCodCita() + "?")) {
+            return;
+        }
+        String estadoAnterior = cita.getEstado();
+        try {
+            ProcesosCita.cancelar(registro.getPendientes(), registro.getHistorial(),
+                    cita.getCodCita());
+            AlmacenarCitas.Guardar(registro);
+            actualizarVista();
+            Mensajes.Mostrar("Cita cancelada correctamente.");
+        } catch (IllegalArgumentException ex) {
+            Mensajes.Mostrar(ex.getMessage());
+        } catch (IOException ex) {
+            registro.getHistorial().Desapilar();
+            cita.setEstado(estadoAnterior);
+            registro.getPendientes().Encolar(cita);
+            actualizarVista();
+            Mensajes.Mostrar("No se pudo guardar la cancelación en el archivo: " + ex.getMessage());
         }
     }
 
@@ -187,59 +211,19 @@ public class ControlGestionCitas implements ActionListener {
         buscarCita();
     }
 
-    private void actualizarTextoOrden() {
-        vista.btnOrdenarFecha.setText(ordenAscendente
-                ? "Fecha: Ordenamiento Ascendente"
-                : "Fecha: Ordenamiento Descendente");
-    }
-
-    private void atenderCita() {
-        if (!esCitaPendienteSeleccionada()) {
-            return;
-        }
-        DialogAtenderCita dialogo = new DialogAtenderCita(UtilidadesUI.obtenerFramePadre(vista), true);
-        ControlDialogAtenderCita controlDialogo
-                = new ControlDialogAtenderCita(dialogo, registro, citaSeleccionada);
-        dialogo.setVisible(true);
-
-        if (controlDialogo.isGuardadoExitoso()) {
-            actualizarVista();
-        }
-    }
-
-        private void cancelarCita() {
-        if (!esCitaPendienteSeleccionada()) {
-            return;
-        }
-        Cita cita = citaSeleccionada;
-
-        if (!Mensajes.Preguntar("Confirmar cancelación",
-                "¿Desea cancelar la cita " + cita.getCodCita() + "?")) {
-            return;
-        }
-
-        ProcesosCita.cancelar(registro.getPendientes(), registro.getHistorial(), cita.getCodCita());
-        actualizarVista();
-        try {
-            AlmacenarCitas.Guardar(registro);
-            Mensajes.Mostrar("Cita cancelada correctamente.");
-        } catch (IOException ex) {
-            Mensajes.Mostrar("La cita se canceló, pero no se pudo guardar en el archivo: " + ex.getMessage());
-        }
-    }
-
     @Override
     public void actionPerformed(ActionEvent e) {
         Object origen = e.getSource();
         if (origen == vista.btnNuevo) {
-            abrirDialogo(null);
+            abrirDialogoCita(null);
         } else if (origen == vista.btnAtenderCita) {
             atenderCita();
         } else if (origen == vista.btnCancelar) {
             cancelarCita();
         } else if (origen == vista.btnOrdenarFecha) {
             alternarOrdenFecha();
-        } else if (origen == vista.btnBuscar || origen == vista.txtBuscar || origen == vista.cboEstado) {
+        } else if (origen == vista.btnBuscar || origen == vista.txtBuscar
+                || origen == vista.cboEstado) {
             buscarCita();
         }
     }

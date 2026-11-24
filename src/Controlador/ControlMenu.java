@@ -16,23 +16,17 @@ public class ControlMenu {
     private final frmMenu vista;
 
     private final pnlClientes panelClientes;
-    private final pnlMascota panelMascotas;
-    private final pnlCitas panelCitas;
+    private final pnlMascotas panelMascotas;
+    private final pnlGestionarCitas panelCitas;
     private final pnlServicio panelServicios;
     private final pnlPersonal panelPersonal;
-
-    private ControlCliente controlClientes;
-    private ControlMascota controlMascotas;
-    private ControlGestionCitas controlCitas;
-    private ControlServicio controlServicios;
-    private ControlPersonal controlPersonal;
 
     public ControlMenu(frmMenu vista) {
         this.vista = vista;
 
         panelClientes = new pnlClientes();
-        panelMascotas = new pnlMascota();
-        panelCitas = new pnlCitas();
+        panelMascotas = new pnlMascotas();
+        panelCitas = new pnlGestionarCitas();
         panelServicios = new pnlServicio();
         panelPersonal = new pnlPersonal();
 
@@ -73,21 +67,11 @@ public class ControlMenu {
     private boolean conectarControlador(Modulo modulo) {
         try {
             switch (modulo) {
-                case CLIENTES -> {
-                    if (controlClientes == null) controlClientes = new ControlCliente(panelClientes);
-                }
-                case MASCOTAS -> {
-                    if (controlMascotas == null) controlMascotas = new ControlMascota(panelMascotas);
-                }
-                case CITAS -> {
-                    if (controlCitas == null) controlCitas = new ControlGestionCitas(panelCitas);
-                }
-                case SERVICIOS -> {
-                    if (controlServicios == null) controlServicios = new ControlServicio(panelServicios);
-                }
-                case PERSONAL -> {
-                    if (controlPersonal == null) controlPersonal = new ControlPersonal(panelPersonal);
-                }
+                case CLIENTES -> new ControlCliente(panelClientes);
+                case MASCOTAS -> new ControlMascota(panelMascotas);
+                case CITAS -> new ControlGestionarCitas(panelCitas);
+                case SERVICIOS -> new ControlServicio(panelServicios);
+                case PERSONAL -> new ControlPersonal(panelPersonal);
             }
             return true;
         } catch (IOException | ClassNotFoundException ex) {

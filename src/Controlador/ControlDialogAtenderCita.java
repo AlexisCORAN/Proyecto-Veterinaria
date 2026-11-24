@@ -35,6 +35,8 @@ public class ControlDialogAtenderCita implements ActionListener {
     }
 
     private void guardar() {
+        String estadoAnterior = cita.getEstado();
+        String detallesAnteriores = cita.getDetallesAtencion();
         try {
             ProcesosCita.atender(registro.getPendientes(), registro.getHistorial(),
                     cita.getCodCita(), vista.txtAreaCita.getText());
@@ -43,14 +45,18 @@ public class ControlDialogAtenderCita implements ActionListener {
             return;
         }
 
-        guardadoExitoso = true;
         try {
             AlmacenarCitas.Guardar(registro);
+            guardadoExitoso = true;
             Mensajes.Mostrar("La cita fue atendida correctamente.");
+            vista.dispose();
         } catch (IOException ex) {
-            Mensajes.Mostrar("La cita fue atendida, pero no se pudo guardar en el archivo: " + ex.getMessage());
+            registro.getHistorial().Desapilar();
+            cita.setEstado(estadoAnterior);
+            cita.setDetallesAtencion(detallesAnteriores);
+            registro.getPendientes().Encolar(cita);
+            Mensajes.Mostrar("No se pudo guardar la atención en el archivo: " + ex.getMessage());
         }
-        vista.dispose();
     }
 
     @Override

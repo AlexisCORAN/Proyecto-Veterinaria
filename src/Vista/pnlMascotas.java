@@ -10,12 +10,12 @@ package Vista;
  * @author Alexis
  */
 
-public class pnlCitas extends javax.swing.JPanel {
+public class pnlMascotas extends javax.swing.JPanel {
 
     /**
      * Creates new form PanelAlumnos
      */
-    public pnlCitas() {
+    public pnlMascotas() {
         initComponents();
         this.setBackground(java.awt.Color.WHITE);
     }
@@ -35,11 +35,11 @@ public class pnlCitas extends javax.swing.JPanel {
         panelNombre = new javax.swing.JPanel();
         nombrePanel = new javax.swing.JLabel();
         filler4 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 50), new java.awt.Dimension(0, 50), new java.awt.Dimension(32767, 32767));
-        panelAccionesServicio = new javax.swing.JPanel();
+        panelAccionesAlumno = new javax.swing.JPanel();
         filler6 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 0));
-        btnCancelar = new javax.swing.JButton();
+        btnEstadoMascota = new javax.swing.JButton();
         filler8 = new javax.swing.Box.Filler(new java.awt.Dimension(30, 0), new java.awt.Dimension(30, 0), new java.awt.Dimension(30, 0));
-        btnAtenderCita = new javax.swing.JButton();
+        btnEdicionMascota = new javax.swing.JButton();
         filler7 = new javax.swing.Box.Filler(new java.awt.Dimension(30, 0), new java.awt.Dimension(30, 0), new java.awt.Dimension(30, 0));
         btnNuevo = new javax.swing.JButton();
         filler3 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15));
@@ -52,11 +52,8 @@ public class pnlCitas extends javax.swing.JPanel {
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15));
         panelCentral = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tablaCitas = new javax.swing.JTable();
+        tablaMascotas = new javax.swing.JTable();
         panelInferior = new javax.swing.JPanel();
-        panelFitroFechas = new javax.swing.JPanel();
-        filler9 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15));
-        btnOrdenarFecha = new javax.swing.JButton();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setLayout(new java.awt.BorderLayout());
@@ -74,50 +71,50 @@ public class pnlCitas extends javax.swing.JPanel {
         panelNombre.setLayout(new java.awt.BorderLayout());
 
         nombrePanel.setFont(new java.awt.Font("Arial", 1, 18)); // NOI18N
-        nombrePanel.setText("Gestión de Citas");
+        nombrePanel.setText("Gestión de Mascotas");
         nombrePanel.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         panelNombre.add(nombrePanel, java.awt.BorderLayout.WEST);
 
         panelSuperior.add(panelNombre);
         panelSuperior.add(filler4);
 
-        panelAccionesServicio.setMaximumSize(new java.awt.Dimension(32767, 35));
-        panelAccionesServicio.setMinimumSize(new java.awt.Dimension(400, 35));
-        panelAccionesServicio.setOpaque(false);
-        panelAccionesServicio.setPreferredSize(new java.awt.Dimension(32767, 35));
-        panelAccionesServicio.setLayout(new javax.swing.BoxLayout(panelAccionesServicio, javax.swing.BoxLayout.X_AXIS));
-        panelAccionesServicio.add(filler6);
+        panelAccionesAlumno.setMaximumSize(new java.awt.Dimension(32767, 35));
+        panelAccionesAlumno.setMinimumSize(new java.awt.Dimension(400, 35));
+        panelAccionesAlumno.setOpaque(false);
+        panelAccionesAlumno.setPreferredSize(new java.awt.Dimension(32767, 35));
+        panelAccionesAlumno.setLayout(new javax.swing.BoxLayout(panelAccionesAlumno, javax.swing.BoxLayout.X_AXIS));
+        panelAccionesAlumno.add(filler6);
 
-        btnCancelar.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        btnCancelar.setText("Cancelar");
-        btnCancelar.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnCancelar.setMaximumSize(new java.awt.Dimension(160, 35));
-        btnCancelar.setMinimumSize(new java.awt.Dimension(160, 35));
-        btnCancelar.setPreferredSize(new java.awt.Dimension(160, 35));
-        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
+        btnEstadoMascota.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnEstadoMascota.setText("Dar baja Mascota");
+        btnEstadoMascota.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnEstadoMascota.setMaximumSize(new java.awt.Dimension(160, 35));
+        btnEstadoMascota.setMinimumSize(new java.awt.Dimension(160, 35));
+        btnEstadoMascota.setPreferredSize(new java.awt.Dimension(160, 35));
+        btnEstadoMascota.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelarActionPerformed(evt);
+                btnEstadoMascotaActionPerformed(evt);
             }
         });
-        panelAccionesServicio.add(btnCancelar);
-        panelAccionesServicio.add(filler8);
+        panelAccionesAlumno.add(btnEstadoMascota);
+        panelAccionesAlumno.add(filler8);
 
-        btnAtenderCita.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        btnAtenderCita.setText("Atender Cita");
-        btnAtenderCita.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        btnAtenderCita.setMaximumSize(new java.awt.Dimension(140, 35));
-        btnAtenderCita.setMinimumSize(new java.awt.Dimension(140, 35));
-        btnAtenderCita.setPreferredSize(new java.awt.Dimension(140, 35));
-        btnAtenderCita.addActionListener(new java.awt.event.ActionListener() {
+        btnEdicionMascota.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
+        btnEdicionMascota.setText("Editar Mascota");
+        btnEdicionMascota.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnEdicionMascota.setMaximumSize(new java.awt.Dimension(140, 35));
+        btnEdicionMascota.setMinimumSize(new java.awt.Dimension(140, 35));
+        btnEdicionMascota.setPreferredSize(new java.awt.Dimension(140, 35));
+        btnEdicionMascota.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAtenderCitaActionPerformed(evt);
+                btnEdicionMascotaActionPerformed(evt);
             }
         });
-        panelAccionesServicio.add(btnAtenderCita);
-        panelAccionesServicio.add(filler7);
+        panelAccionesAlumno.add(btnEdicionMascota);
+        panelAccionesAlumno.add(filler7);
 
         btnNuevo.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
-        btnNuevo.setText("Nueva Cita");
+        btnNuevo.setText("Nueva Mascota");
         btnNuevo.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         btnNuevo.setMaximumSize(new java.awt.Dimension(140, 35));
         btnNuevo.setMinimumSize(new java.awt.Dimension(140, 35));
@@ -127,9 +124,9 @@ public class pnlCitas extends javax.swing.JPanel {
                 btnNuevoActionPerformed(evt);
             }
         });
-        panelAccionesServicio.add(btnNuevo);
+        panelAccionesAlumno.add(btnNuevo);
 
-        panelSuperior.add(panelAccionesServicio);
+        panelSuperior.add(panelAccionesAlumno);
         panelSuperior.add(filler3);
 
         panelBusqueda.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
@@ -156,7 +153,7 @@ public class pnlCitas extends javax.swing.JPanel {
             javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
     panelBusqueda.add(filler5);
 
-    cboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TODOS", "PENDIENTES", "ATENDIDAS", "CANCELADAS" }));
+    cboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TODOS", "ACTIVOS", "RETIRADOS" }));
     cboEstado.setMinimumSize(new java.awt.Dimension(72, 35));
     cboEstado.setPreferredSize(new java.awt.Dimension(72, 35));
     cboEstado.addActionListener(new java.awt.event.ActionListener() {
@@ -190,23 +187,23 @@ public class pnlCitas extends javax.swing.JPanel {
     jScrollPane1.setMinimumSize(new java.awt.Dimension(650, 450));
     jScrollPane1.setPreferredSize(new java.awt.Dimension(650, 450));
 
-    tablaCitas.setFillsViewportHeight(true);
-    tablaCitas.setOpaque(false);
-    tablaCitas.setRowHeight(40);
-    tablaCitas.setShowGrid(false);
-    tablaCitas.setShowHorizontalLines(true);
-    tablaCitas.addMouseListener(new java.awt.event.MouseAdapter() {
+    tablaMascotas.setFillsViewportHeight(true);
+    tablaMascotas.setOpaque(false);
+    tablaMascotas.setRowHeight(40);
+    tablaMascotas.setShowGrid(false);
+    tablaMascotas.setShowHorizontalLines(true);
+    tablaMascotas.addMouseListener(new java.awt.event.MouseAdapter() {
         public void mouseClicked(java.awt.event.MouseEvent evt) {
-            tablaCitasMouseClicked(evt);
+            tablaMascotasMouseClicked(evt);
         }
     });
-    jScrollPane1.setViewportView(tablaCitas);
-    javax.swing.table.JTableHeader header = tablaCitas.getTableHeader();
+    jScrollPane1.setViewportView(tablaMascotas);
+    javax.swing.table.JTableHeader header = tablaMascotas.getTableHeader();
     header.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 14));
     header.setBackground(new java.awt.Color(245, 245, 245)); // Gris muy claro
     header.setOpaque(true);
     header.setReorderingAllowed(false);
-    tablaCitas.setGridColor(new java.awt.Color(230, 230, 230));
+    tablaMascotas.setGridColor(new java.awt.Color(230, 230, 230));
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
@@ -219,26 +216,20 @@ public class pnlCitas extends javax.swing.JPanel {
 
     panelPrincipal.add(panelCentral, java.awt.BorderLayout.CENTER);
 
-    panelInferior.setBackground(new java.awt.Color(255, 255, 255));
-    panelInferior.setLayout(new javax.swing.BoxLayout(panelInferior, javax.swing.BoxLayout.Y_AXIS));
-
-    panelFitroFechas.setLayout(new java.awt.BorderLayout());
-    panelFitroFechas.add(filler9, java.awt.BorderLayout.LINE_END);
-
-    btnOrdenarFecha.setText("Ordenar por fechas");
-    btnOrdenarFecha.setMaximumSize(new java.awt.Dimension(75, 35));
-    btnOrdenarFecha.setMinimumSize(new java.awt.Dimension(75, 35));
-    btnOrdenarFecha.setPreferredSize(new java.awt.Dimension(75, 35));
-    panelFitroFechas.add(btnOrdenarFecha, java.awt.BorderLayout.PAGE_END);
-
-    panelInferior.add(panelFitroFechas);
+    javax.swing.GroupLayout panelInferiorLayout = new javax.swing.GroupLayout(panelInferior);
+    panelInferior.setLayout(panelInferiorLayout);
+    panelInferiorLayout.setHorizontalGroup(
+        panelInferiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGap(0, 0, Short.MAX_VALUE)
+    );
+    panelInferiorLayout.setVerticalGroup(
+        panelInferiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        .addGap(0, 0, Short.MAX_VALUE)
+    );
 
     panelPrincipal.add(panelInferior, java.awt.BorderLayout.SOUTH);
 
     add(panelPrincipal, java.awt.BorderLayout.CENTER);
-
-    getAccessibleContext().setAccessibleName("");
-    getAccessibleContext().setAccessibleDescription("");
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
@@ -253,29 +244,28 @@ public class pnlCitas extends javax.swing.JPanel {
 
     }//GEN-LAST:event_btnBuscarActionPerformed
 
-    private void tablaCitasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaCitasMouseClicked
+    private void tablaMascotasMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMascotasMouseClicked
 
-    }//GEN-LAST:event_tablaCitasMouseClicked
+    }//GEN-LAST:event_tablaMascotasMouseClicked
 
     private void cboEstadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cboEstadoActionPerformed
 
     }//GEN-LAST:event_cboEstadoActionPerformed
 
-    private void btnAtenderCitaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtenderCitaActionPerformed
+    private void btnEstadoMascotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEstadoMascotaActionPerformed
+
+    }//GEN-LAST:event_btnEstadoMascotaActionPerformed
+
+    private void btnEdicionMascotaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEdicionMascotaActionPerformed
   
-    }//GEN-LAST:event_btnAtenderCitaActionPerformed
-
-    private void btnCancelarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelarActionPerformed
-
-    }//GEN-LAST:event_btnCancelarActionPerformed
+    }//GEN-LAST:event_btnEdicionMascotaActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton btnAtenderCita;
     public javax.swing.JButton btnBuscar;
-    public javax.swing.JButton btnCancelar;
+    public javax.swing.JButton btnEdicionMascota;
+    public javax.swing.JButton btnEstadoMascota;
     public javax.swing.JButton btnNuevo;
-    public javax.swing.JButton btnOrdenarFecha;
     public javax.swing.JComboBox<String> cboEstado;
     private javax.swing.Box.Filler filler1;
     private javax.swing.Box.Filler filler2;
@@ -285,18 +275,16 @@ public class pnlCitas extends javax.swing.JPanel {
     private javax.swing.Box.Filler filler6;
     private javax.swing.Box.Filler filler7;
     private javax.swing.Box.Filler filler8;
-    private javax.swing.Box.Filler filler9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel nombrePanel;
-    private javax.swing.JPanel panelAccionesServicio;
+    private javax.swing.JPanel panelAccionesAlumno;
     private javax.swing.JPanel panelBusqueda;
     private javax.swing.JPanel panelCentral;
-    private javax.swing.JPanel panelFitroFechas;
     private javax.swing.JPanel panelInferior;
     private javax.swing.JPanel panelNombre;
     private javax.swing.JPanel panelPrincipal;
     private javax.swing.JPanel panelSuperior;
-    public javax.swing.JTable tablaCitas;
+    public javax.swing.JTable tablaMascotas;
     public javax.swing.JTextField txtBuscar;
     // End of variables declaration//GEN-END:variables
 }

@@ -66,7 +66,7 @@ public class DialogNuevaMascota extends javax.swing.JDialog {
         filler10 = new javax.swing.Box.Filler(new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0));
         btnBuscarCliente = new javax.swing.JButton();
         panelRowCliente1 = new javax.swing.JPanel();
-        lblCodigoCliente1 = new javax.swing.JLabel();
+        txtPropietario = new javax.swing.JLabel();
         filler17 = new javax.swing.Box.Filler(new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0));
         txtCodigoCliente1 = new javax.swing.JTextField();
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15));
@@ -234,11 +234,11 @@ public class DialogNuevaMascota extends javax.swing.JDialog {
         panelRowCliente1.setOpaque(false);
         panelRowCliente1.setLayout(new javax.swing.BoxLayout(panelRowCliente1, javax.swing.BoxLayout.X_AXIS));
 
-        lblCodigoCliente1.setText("Propietario");
-        lblCodigoCliente1.setMaximumSize(new java.awt.Dimension(120, 30));
-        lblCodigoCliente1.setMinimumSize(new java.awt.Dimension(120, 30));
-        lblCodigoCliente1.setPreferredSize(new java.awt.Dimension(120, 30));
-        panelRowCliente1.add(lblCodigoCliente1);
+        txtPropietario.setText("Propietario");
+        txtPropietario.setMaximumSize(new java.awt.Dimension(120, 30));
+        txtPropietario.setMinimumSize(new java.awt.Dimension(120, 30));
+        txtPropietario.setPreferredSize(new java.awt.Dimension(120, 30));
+        panelRowCliente1.add(txtPropietario);
         panelRowCliente1.add(filler17);
 
         txtCodigoCliente1.setEditable(false);
@@ -338,7 +338,6 @@ public class DialogNuevaMascota extends javax.swing.JDialog {
     private javax.swing.Box.Filler filler8;
     private javax.swing.Box.Filler filler9;
     public javax.swing.JLabel lblBuscarCliente;
-    public javax.swing.JLabel lblCodigoCliente1;
     public javax.swing.JLabel lblCodigoMascota;
     public javax.swing.JLabel lblEspecie;
     public javax.swing.JLabel lblNombresMascota;
@@ -360,6 +359,7 @@ public class DialogNuevaMascota extends javax.swing.JDialog {
     public javax.swing.JTextField txtCodigoCliente1;
     public javax.swing.JTextField txtCodigoMascota;
     public javax.swing.JTextField txtNombresMascota;
+    public javax.swing.JLabel txtPropietario;
     public javax.swing.JTextField txtRazaMascota;
     // End of variables declaration//GEN-END:variables
 }

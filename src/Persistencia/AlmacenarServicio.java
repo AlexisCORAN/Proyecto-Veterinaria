@@ -1,4 +1,3 @@
-
 package Persistencia;
 
 import EstructuraArrayList.ListaServicios;
@@ -8,7 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class AlmacenarServicio {
 
@@ -24,10 +24,7 @@ public class AlmacenarServicio {
             oos.writeObject(lista);
         }
 
-        if (fileOriginal.exists()) {
-            fileOriginal.delete();
-        }
-        fileTmp.renameTo(fileOriginal);
+        Files.move(fileTmp.toPath(), fileOriginal.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static ListaServicios Recuperar() throws IOException, ClassNotFoundException {

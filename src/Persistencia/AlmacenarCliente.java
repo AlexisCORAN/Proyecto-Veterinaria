@@ -1,4 +1,3 @@
-
 package Persistencia;
 
 import ListaEnlazadas.ListaClientes;
@@ -8,8 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
-
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class AlmacenarCliente {
 
@@ -20,17 +19,12 @@ public class AlmacenarCliente {
         File fileTmp = new File(ARCHIVO_TMP);
         File fileOriginal = new File(ARCHIVO);
 
-        
         try (FileOutputStream fos = new FileOutputStream(fileTmp);
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(lista);
         }
 
-        
-        if (fileOriginal.exists()) {
-            fileOriginal.delete();
-        }
-        fileTmp.renameTo(fileOriginal);
+        Files.move(fileTmp.toPath(), fileOriginal.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static ListaClientes Recuperar() throws IOException, ClassNotFoundException {

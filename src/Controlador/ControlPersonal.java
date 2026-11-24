@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import javax.swing.DefaultComboBoxModel;
 
 public class ControlPersonal implements ActionListener {
 
@@ -29,8 +30,15 @@ public class ControlPersonal implements ActionListener {
         this.vista = vista;
         this.lista = AlmacenarPersonal.Recuperar();
 
+        configurarFiltros();
         registrarEventos();
         cargarTabla("");
+    }
+
+    private void configurarFiltros() {
+        vista.cboEstado.setModel(new DefaultComboBoxModel<>(new String[]{
+            "TODOS", "ACTIVOS", "RETIRADOS"
+        }));
     }
 
     private void registrarEventos() {

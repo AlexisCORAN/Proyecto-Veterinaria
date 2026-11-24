@@ -1,4 +1,3 @@
-
 package Persistencia;
 
 import Colas.ColaCitas;
@@ -10,7 +9,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public class AlmacenarCitas {
 
@@ -29,10 +29,7 @@ public class AlmacenarCitas {
             oos.writeObject(registro);
         }
 
-        if (fileOriginal.exists()) {
-            fileOriginal.delete();
-        }
-        fileTmp.renameTo(fileOriginal);
+        Files.move(fileTmp.toPath(), fileOriginal.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     public static RegistroCitas Recuperar() throws IOException, ClassNotFoundException {
@@ -48,7 +45,6 @@ public class AlmacenarCitas {
         }
     }
 
-    
     public static class RegistroCitas implements Serializable {
 
         private static final long serialVersionUID = 1L;

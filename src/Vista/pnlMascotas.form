@@ -125,7 +125,7 @@
                     <AuxValue name="classDetails" type="java.lang.String" value="Box.Filler.HorizontalGlue"/>
                   </AuxValues>
                 </Component>
-                <Component class="javax.swing.JButton" name="btnEstadoCliente">
+                <Component class="javax.swing.JButton" name="btnEstadoMascota">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Arial" size="14" style="0"/>
@@ -143,7 +143,7 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEstadoClienteActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEstadoMascotaActionPerformed"/>
                   </Events>
                   <AuxValues>
                     <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
@@ -162,7 +162,7 @@
                     </Property>
                   </Properties>
                 </Component>
-                <Component class="javax.swing.JButton" name="btnEdicionCliente">
+                <Component class="javax.swing.JButton" name="btnEdicionMascota">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Arial" size="14" style="0"/>
@@ -180,7 +180,7 @@
                     </Property>
                   </Properties>
                   <Events>
-                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEdicionClienteActionPerformed"/>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEdicionMascotaActionPerformed"/>
                   </Events>
                   <AuxValues>
                     <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>
@@ -419,9 +419,9 @@
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
               <SubComponents>
-                <Component class="javax.swing.JTable" name="tablaMascota">
+                <Component class="javax.swing.JTable" name="tablaMascotas">
                   <Properties>
-                    <Property name="columnModel" postCode="javax.swing.table.JTableHeader header = tablaMascota.getTableHeader();&#xa;        header.setFont(new java.awt.Font(&quot;Segoe UI&quot;, java.awt.Font.BOLD, 14));&#xa;        header.setBackground(new java.awt.Color(245, 245, 245)); // Gris muy claro&#xa;        header.setOpaque(true);&#xa;        header.setReorderingAllowed(false);&#xa;tablaMascota.setGridColor(new java.awt.Color(230, 230, 230));"/>
+                    <Property name="columnModel" postCode="javax.swing.table.JTableHeader header = tablaMascotas.getTableHeader();&#xa;        header.setFont(new java.awt.Font(&quot;Segoe UI&quot;, java.awt.Font.BOLD, 14));&#xa;        header.setBackground(new java.awt.Color(245, 245, 245)); // Gris muy claro&#xa;        header.setOpaque(true);&#xa;        header.setReorderingAllowed(false);&#xa;tablaMascotas.setGridColor(new java.awt.Color(230, 230, 230));"/>
                     <Property name="fillsViewportHeight" type="boolean" value="true"/>
                     <Property name="opaque" type="boolean" value="false"/>
                     <Property name="rowHeight" type="int" value="40"/>
@@ -429,7 +429,7 @@
                     <Property name="showHorizontalLines" type="boolean" value="true"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tablaMascotaMouseClicked"/>
+                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tablaMascotasMouseClicked"/>
                   </Events>
                   <AuxValues>
                     <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>

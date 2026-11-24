@@ -42,6 +42,7 @@ public class ProcesosPersonal {
 
     public static void registrar(ListaPersonal lista, Personal nuevo) {
         validar(nuevo);
+        copiarDatos(nuevo, nuevo);
         if (buscarPorDni(lista, nuevo.getDni()) != null) {
             throw new IllegalArgumentException("Ya existe personal registrado con ese DNI.");
         }
@@ -64,7 +65,7 @@ public class ProcesosPersonal {
     }
 
     public static boolean desactivar(ListaPersonal lista, Personal personal) {
-        return personal.isActivo() && lista.Desactivar(personal.getCodPersonal());
+        return personal != null && personal.isActivo() && lista.Desactivar(personal.getCodPersonal());
     }
 
     private static Personal buscarPorDni(ListaPersonal lista, String dni) {
@@ -82,7 +83,7 @@ public class ProcesosPersonal {
         destino.setNombres(textoSeguro(origen.getNombres()));
         destino.setApellidos(textoSeguro(origen.getApellidos()));
         destino.setTelefono(textoSeguro(origen.getTelefono()));
-        destino.setFechaNacimiento(origen.getFechaNacimiento());
+        destino.setFechaNacimiento(textoSeguro(origen.getFechaNacimiento()));
         destino.setCargo(textoSeguro(origen.getCargo()));
     }
 

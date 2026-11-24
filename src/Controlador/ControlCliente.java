@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import javax.swing.DefaultComboBoxModel;
 
 public class ControlCliente implements ActionListener {
 
@@ -29,10 +30,16 @@ public class ControlCliente implements ActionListener {
         this.vista = vista;
         this.lista = AlmacenarCliente.Recuperar();
 
+        configurarFiltros();
         registrarEventos();
         cargarTabla("");
     }
 
+    private void configurarFiltros() {
+        vista.cboEstado.setModel(new DefaultComboBoxModel<>(new String[]{
+            "TODOS", "ACTIVOS", "RETIRADOS"
+        }));
+    }
 
     private void registrarEventos() {
         vista.btnNuevo.addActionListener(this);
@@ -59,6 +66,7 @@ public class ControlCliente implements ActionListener {
                 int fila = vista.tablaClientes.rowAtPoint(e.getPoint());
                 if (fila >= 0) {
                     vista.tablaClientes.setRowSelectionInterval(fila, fila);
+                    seleccionarClienteDeTabla();
                     if (clienteSeleccionado != null) {
                         abrirDialogo(clienteSeleccionado);
                     }
@@ -66,7 +74,6 @@ public class ControlCliente implements ActionListener {
             }
         });
     }
-
 
     private void actualizarVista() {
         UtilidadesUI.restablecerPlaceholder(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
@@ -104,7 +111,6 @@ public class ControlCliente implements ActionListener {
         actualizarEstadoBotones();
     }
 
-
     private void abrirDialogo(Cliente clienteEdicion) {
         DialogNuevoCliente dialogo = new DialogNuevoCliente(UtilidadesUI.obtenerFramePadre(vista), true);
         ControlDialogCliente controlDialogo = new ControlDialogCliente(dialogo, lista, clienteEdicion);
@@ -126,6 +132,9 @@ public class ControlCliente implements ActionListener {
 
     private void desactivarCliente() {
         Cliente cliente = clienteSeleccionado;
+        if (cliente == null) {
+            return;
+        }
 
         if (!Mensajes.Preguntar("Confirmar baja",
                 "¿Desea dar de baja al cliente con código " + cliente.getCodCliente() + "?")) {
@@ -142,17 +151,17 @@ public class ControlCliente implements ActionListener {
             actualizarVista();
             Mensajes.Mostrar("Cliente dado de baja correctamente.");
         } catch (IOException ex) {
-            cliente.setActivo(true); 
+            cliente.setActivo(true);
             Mensajes.Mostrar("No se pudo guardar la baja del cliente: " + ex.getMessage());
         }
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         Object origen = e.getSource();
         if (origen == vista.btnNuevo) {
             abrirDialogo(null);
-        } else if (origen == vista.btnEdicionCliente) {
+        } else if (origen == vista.btnEdicionCliente && clienteSeleccionado != null) {
             abrirDialogo(clienteSeleccionado);
         } else if (origen == vista.btnEstadoCliente) {
             desactivarCliente();

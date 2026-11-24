@@ -1,4 +1,3 @@
-
 package Entidades;
 
 import java.io.Serializable;
@@ -6,10 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 public class Cita implements Serializable {
 
-    private static final long serialVersionUID = 1L;
 
     private String codCita;
     private String fecha;
@@ -25,6 +22,7 @@ public class Cita implements Serializable {
     public Cita() {
         this.estado = "Pendiente";
         this.detallesAtencion = "";
+        this.codigosServicios = new ArrayList<>();
     }
 
     public Cita(String codCita, String fecha, String hora, String codMascota, String codPersonal, String codServicio) {
@@ -35,18 +33,14 @@ public class Cita implements Serializable {
         this.detallesAtencion = "";
         this.codMascota = codMascota;
         this.codPersonal = codPersonal;
-        this.codServicio = codServicio;
         this.codigosServicios = new ArrayList<>();
-        if (codServicio != null && !codServicio.isBlank()) {
-            this.codigosServicios.add(codServicio);
-        }
+        setCodServicio(codServicio);
     }
 
     public Object[] Registro(int num) {
         return new Object[]{num, codCita, fecha, hora, estado, codMascota, codPersonal,
             String.join(", ", getCodigosServicios()), total, detallesAtencion};
     }
-
 
     public String getCodCita() {
         return codCita;
@@ -112,8 +106,10 @@ public class Cita implements Serializable {
         this.codServicio = codServicio;
         if (codigosServicios == null) {
             codigosServicios = new ArrayList<>();
+        } else {
+            codigosServicios.clear();
         }
-        if (codigosServicios.isEmpty() && codServicio != null && !codServicio.isBlank()) {
+        if (codServicio != null && !codServicio.isBlank()) {
             codigosServicios.add(codServicio);
         }
     }
@@ -127,7 +123,7 @@ public class Cita implements Serializable {
     }
 
     public void setCodigosServicios(List<String> codigosServicios) {
-        this.codigosServicios = new ArrayList<>(codigosServicios);
+        this.codigosServicios = codigosServicios == null ? new ArrayList<>() : new ArrayList<>(codigosServicios);
         this.codServicio = this.codigosServicios.isEmpty() ? null : this.codigosServicios.get(0);
     }
 

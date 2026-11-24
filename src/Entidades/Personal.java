@@ -4,8 +4,6 @@ package Entidades;
 
 public class Personal extends Persona {
 
-    private static final long serialVersionUID = 1L;
-
     private String codPersonal;
     private String apellidos;
     private String fechaNacimiento;
