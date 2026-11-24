@@ -1,10 +1,8 @@
 package Controlador;
 
-import Colas.ColaCitas;
 import Entidades.Cita;
 import Persistencia.AlmacenarCitas;
 import Persistencia.AlmacenarCitas.RegistroCitas;
-import Pilas.PilaCitas;
 import Procesos.Mensajes;
 import Procesos.ProcesosCita;
 import Vista.DialogAtenderCita;
@@ -37,29 +35,21 @@ public class ControlDialogAtenderCita implements ActionListener {
     }
 
     private void guardar() {
-        ColaCitas pendientes = registro.getPendientes();
-        PilaCitas historial = registro.getHistorial();
-        String detallesAnteriores = cita.getDetallesAtencion();
-
         try {
-            Cita atendida = ProcesosCita.atender(pendientes, historial,
+            ProcesosCita.atender(registro.getPendientes(), registro.getHistorial(),
                     cita.getCodCita(), vista.txtAreaCita.getText());
-            try {
-                AlmacenarCitas.Guardar(registro);
-            } catch (IOException ex) {
-                ProcesosCita.restaurarPendiente(pendientes, historial, atendida, detallesAnteriores);
-                throw ex;
-            }
         } catch (IllegalArgumentException ex) {
             Mensajes.Mostrar(ex.getMessage());
-            return;
-        } catch (IOException ex) {
-            Mensajes.Mostrar("No se pudo guardar la atención: " + ex.getMessage());
             return;
         }
 
         guardadoExitoso = true;
-        Mensajes.Mostrar("La cita fue atendida correctamente.");
+        try {
+            AlmacenarCitas.Guardar(registro);
+            Mensajes.Mostrar("La cita fue atendida correctamente.");
+        } catch (IOException ex) {
+            Mensajes.Mostrar("La cita fue atendida, pero no se pudo guardar en el archivo: " + ex.getMessage());
+        }
         vista.dispose();
     }
 

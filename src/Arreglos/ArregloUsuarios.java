@@ -18,10 +18,9 @@ public class ArregloUsuarios implements Serializable {
     }
 
     public Usuario ValidarAcceso(String user, String pass) {
-        for (int i = 0; i < usuarios.length; i++) {
-            if (usuarios[i].getUsername().equals(user)
-                    && usuarios[i].getPassword().equals(pass)) {
-                return usuarios[i];
+        for (Usuario usuario : usuarios) {
+            if (usuario.getUsername().equals(user) && usuario.getPassword().equals(pass)) {
+                return usuario;
             }
         }
         return null;

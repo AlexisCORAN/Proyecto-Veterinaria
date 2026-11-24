@@ -41,9 +41,6 @@ public class ProcesosCita {
         return arbol;
     }
 
-    
-    
-    
     public static Cita registrar(String fecha, String hora, Mascota mascota, Personal personal,
             List<Servicio> servicios, ListaClientes clientes, ColaCitas pendientes, PilaCitas historial) {
         if (!mascota.isActivo()) {
@@ -65,7 +62,7 @@ public class ProcesosCita {
         return cita;
     }
 
-    public static Cita editar(Cita cita, String fecha, String hora, Personal personal,
+    public static void editar(Cita cita, String fecha, String hora, Personal personal,
             List<Servicio> servicios, ColaCitas pendientes) {
         if (!ESTADO_PENDIENTE.equalsIgnoreCase(cita.getEstado())) {
             throw new IllegalArgumentException("Solo se pueden editar citas en estado Pendiente.");
@@ -77,30 +74,13 @@ public class ProcesosCita {
         validarDisponibilidad(pendientes, fecha, hora, cita.getCodMascota(),
                 personal.getCodPersonal(), cita.getCodCita());
 
-        Cita copia = copiar(cita);
         cita.setFecha(fecha);
         cita.setHora(hora);
         cita.setCodPersonal(personal.getCodPersonal());
         cita.setCodigosServicios(codigos);
         cita.setTotal(total);
-        return copia;
     }
 
-    public static void revertirEdicion(Cita cita, Cita copiaAnterior) {
-        cita.setFecha(copiaAnterior.getFecha());
-        cita.setHora(copiaAnterior.getHora());
-        cita.setCodPersonal(copiaAnterior.getCodPersonal());
-        cita.setCodigosServicios(new ArrayList<>(copiaAnterior.getCodigosServicios()));
-        cita.setTotal(copiaAnterior.getTotal());
-    }
-
-    public static void revertirRegistro(ColaCitas pendientes, String codigo) {
-        pendientes.Eliminar(codigo);
-    }
-
-    
-    
-    
     public static Cita atender(ColaCitas pendientes, PilaCitas historial, String codigo, String detalles) {
         if (detalles == null || detalles.isBlank()) {
             throw new IllegalArgumentException("Ingrese los detalles de la atención.");
@@ -119,12 +99,10 @@ public class ProcesosCita {
         return cita;
     }
 
-    public static void restaurarPendiente(ColaCitas pendientes, PilaCitas historial,
-            Cita cita, String detallesAnteriores) {
-        historial.Eliminar(cita.getCodCita());
-        cita.setEstado(ESTADO_PENDIENTE);
-        cita.setDetallesAtencion(detallesAnteriores);
-        pendientes.InsertarAlInicio(cita);
+    public static String ultimoMovimiento(PilaCitas historial) {
+        Cita tope = historial.VerTope();
+        return tope == null ? "Sin movimientos"
+                : tope.getCodCita() + " (" + tope.getEstado() + ")";
     }
 
     private static Cita retirarDePendientes(ColaCitas pendientes, String codigo, String accion) {
@@ -136,19 +114,12 @@ public class ProcesosCita {
         return cita;
     }
 
-    
-    
-    
     private static void validarPersonal(Personal personal) {
         if (personal == null || !personal.isActivo()
                 || !CARGO_VETERINARIO.equalsIgnoreCase(personal.getCargo())) {
             throw new IllegalArgumentException("Seleccione un veterinario activo.");
         }
     }
-
-    
-
-
 
     private static double validarServicios(List<Servicio> servicios, List<String> codigosSalida) {
         if (servicios == null || servicios.isEmpty()) {
@@ -205,9 +176,6 @@ public class ProcesosCita {
         }
     }
 
-    
-    
-    
     private static LocalDate parsearFecha(String fecha) {
         try {
             return LocalDate.parse(fecha.trim(), FORMATO_FECHA);
@@ -235,14 +203,4 @@ public class ProcesosCita {
         return GeneradorCodigos.Siguiente("CIT-", codigos);
     }
 
-    private static Cita copiar(Cita c) {
-        List<String> servicios = c.getCodigosServicios();
-        Cita copia = new Cita(c.getCodCita(), c.getFecha(), c.getHora(), c.getCodMascota(),
-                c.getCodPersonal(), servicios.isEmpty() ? "" : servicios.get(0));
-        copia.setCodigosServicios(new ArrayList<>(servicios));
-        copia.setTotal(c.getTotal());
-        copia.setEstado(c.getEstado());
-        copia.setDetallesAtencion(c.getDetallesAtencion());
-        return copia;
-    }
 }

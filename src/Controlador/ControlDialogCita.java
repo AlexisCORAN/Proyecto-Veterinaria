@@ -34,10 +34,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 
-
-
-
-
 public class ControlDialogCita implements ActionListener {
 
     private static final String PATRON_FECHA = "dd/MM/yyyy";
@@ -92,9 +88,6 @@ public class ControlDialogCita implements ActionListener {
         return guardadoExitoso;
     }
 
-    
-    
-    
     private void registrarEventos(boolean permitirBuscarMascota, boolean permitirEditar) {
         vista.btnCancelar.addActionListener(this);
 
@@ -103,11 +96,19 @@ public class ControlDialogCita implements ActionListener {
             vista.txtBuscarMascota.addActionListener(this);
             vista.txtBuscarMascota.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
-                public void insertUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
+                public void insertUpdate(DocumentEvent e) {
+                    invalidarMascotaSiCambio();
+                }
+
                 @Override
-                public void removeUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
+                public void removeUpdate(DocumentEvent e) {
+                    invalidarMascotaSiCambio();
+                }
+
                 @Override
-                public void changedUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
+                public void changedUpdate(DocumentEvent e) {
+                    invalidarMascotaSiCambio();
+                }
             });
         }
 
@@ -178,8 +179,7 @@ public class ControlDialogCita implements ActionListener {
             Servicio servicio = servicios.Buscar(codigo);
             if (servicio != null) {
                 if (esEditable && !servicio.isActivo()) {
-                    
-                    
+
                     Servicio copiaHistorica = new Servicio(
                             servicio.getCodServicio(),
                             servicio.getNombre() + " (Retirado)",
@@ -198,7 +198,6 @@ public class ControlDialogCita implements ActionListener {
         }
         actualizarServicios();
 
-        
         if (!esEditable) {
             vista.txtTotal.setText(formatearMonto(cita.getTotal()));
         }
@@ -213,7 +212,7 @@ public class ControlDialogCita implements ActionListener {
             vista.cboPersonal.addItem(texto);
             return;
         }
-        
+
         if (nodo != null && !opcionesPersonal.containsKey(texto)) {
             opcionesPersonal.put(texto, nodo.personal);
             vista.cboPersonal.addItem(texto);
@@ -235,9 +234,6 @@ public class ControlDialogCita implements ActionListener {
         vista.btnCancelar.setText(esEditable ? "Cancelar" : "Cerrar");
     }
 
-    
-    
-    
     private void buscarMascota() {
         String dato = vista.txtBuscarMascota.getText().trim();
         mascotaSeleccionada = null;
@@ -299,8 +295,7 @@ public class ControlDialogCita implements ActionListener {
             Mensajes.Mostrar("La mascota pertenece a un cliente retirado o inexistente.");
             return;
         }
-        
-        
+
         vista.txtBuscarMascota.setText(mascota.getCodMascota());
         mascotaSeleccionada = mascota;
         vista.txtNombrePaciente.setText(mascota.getNombre() + " - "
@@ -315,9 +310,6 @@ public class ControlDialogCita implements ActionListener {
         }
     }
 
-    
-    
-    
     private void agregarServicio() {
         Object seleccion = vista.cboServicios.getSelectedItem();
         Servicio servicio = (seleccion == null) ? null : opcionesServicios.get(seleccion.toString());
@@ -362,9 +354,8 @@ public class ControlDialogCita implements ActionListener {
     }
 
     
-    
-    
-    private void guardar() {
+
+        private void guardar() {
         try {
             if (citaEnEdicion == null) {
                 guardarNuevaCita();
@@ -373,48 +364,36 @@ public class ControlDialogCita implements ActionListener {
             }
         } catch (IllegalArgumentException ex) {
             Mensajes.Mostrar(ex.getMessage());
-        } catch (IOException ex) {
-            Mensajes.Mostrar("No se pudo guardar la cita: " + ex.getMessage());
         }
     }
 
-    private void guardarNuevaCita() throws IOException {
+    private void guardarNuevaCita() {
         if (mascotaSeleccionada == null) {
             throw new IllegalArgumentException("Debe buscar y seleccionar un paciente válido antes de guardar.");
         }
         Cita nueva = ProcesosCita.registrar(fechaSeleccionada(), horaSeleccionada(), mascotaSeleccionada,
                 personalSeleccionado(), serviciosSeleccionados, clientes,
                 registro.getPendientes(), registro.getHistorial());
-        try {
-            AlmacenarCitas.Guardar(registro);
-        } catch (IOException ex) {
-            ProcesosCita.revertirRegistro(registro.getPendientes(), nueva.getCodCita());
-            throw ex;
-        }
-        finalizar("Cita " + nueva.getCodCita() + " registrada correctamente.");
+        persistir("Cita " + nueva.getCodCita() + " registrada correctamente.");
     }
 
-    private void guardarEdicion() throws IOException {
-        Cita copiaAnterior = ProcesosCita.editar(citaEnEdicion, fechaSeleccionada(), horaSeleccionada(),
+    private void guardarEdicion() {
+        ProcesosCita.editar(citaEnEdicion, fechaSeleccionada(), horaSeleccionada(),
                 personalSeleccionado(), serviciosSeleccionados, registro.getPendientes());
-        try {
-            AlmacenarCitas.Guardar(registro);
-        } catch (IOException ex) {
-            ProcesosCita.revertirEdicion(citaEnEdicion, copiaAnterior);
-            throw ex;
-        }
-        finalizar("Cita " + citaEnEdicion.getCodCita() + " actualizada correctamente.");
+        persistir("Cita " + citaEnEdicion.getCodCita() + " actualizada correctamente.");
     }
 
-    private void finalizar(String mensaje) {
+    private void persistir(String mensajeOk) {
         guardadoExitoso = true;
-        Mensajes.Mostrar(mensaje);
+        try {
+            AlmacenarCitas.Guardar(registro);
+            Mensajes.Mostrar(mensajeOk);
+        } catch (IOException ex) {
+            Mensajes.Mostrar("Los cambios se aplicaron, pero no se pudo guardar en el archivo: " + ex.getMessage());
+        }
         vista.dispose();
     }
 
-    
-    
-    
     private String fechaSeleccionada() {
         return FORMATO_FECHA.format((Date) vista.spinFecha.getValue());
     }

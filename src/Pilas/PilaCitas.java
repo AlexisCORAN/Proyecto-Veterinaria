@@ -3,33 +3,37 @@ package Pilas;
 import Entidades.Cita;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 public class PilaCitas implements Serializable {
+
     private static final long serialVersionUID = 1L;
-    private final List<Cita> citas = new ArrayList<>();
+    private final Stack<Cita> pila = new Stack<>();
+
     public void Apilar(Cita cita) {
-        if (cita == null) { throw new IllegalArgumentException("La cita no puede ser nula."); }
-        citas.add(cita);
+        if (cita == null) {
+            throw new IllegalArgumentException("La cita no puede ser nula.");
+        }
+        pila.push(cita);
     }
 
-    public Cita Desapilar() { return citas.isEmpty() ? null : citas.remove(citas.size() - 1); }
-
-    public Cita Buscar(String codigo) {
-        for (int i = citas.size() - 1; i >= 0; i--) {
-            Cita cita = citas.get(i);
-            if (cita.getCodCita().equalsIgnoreCase(codigo)) {
-                return cita;
-            }
-        } return null;
+    public Cita Desapilar() {
+        return pila.isEmpty() ? null : pila.pop();
     }
 
-    public boolean Eliminar(String codigo) {
-        Cita cita = Buscar(codigo);
-        return cita != null && citas.remove(cita);
+    public Cita VerTope() {
+        return pila.isEmpty() ? null : pila.peek();
     }
 
-    public int Cantidad() { return citas.size(); }
+    public int Cantidad() {
+        return pila.size();
+    }
 
-    public List<Cita> getCitas() { return new ArrayList<>(citas); }
+    public List<Cita> getCitas() {
+        List<Cita> lista = new ArrayList<>(pila);
+        Collections.reverse(lista);
+        return lista;
+    }
 }

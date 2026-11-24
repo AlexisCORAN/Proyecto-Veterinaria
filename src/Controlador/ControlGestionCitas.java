@@ -207,7 +207,7 @@ public class ControlGestionCitas implements ActionListener {
         }
     }
 
-    private void cancelarCita() {
+        private void cancelarCita() {
         if (!esCitaPendienteSeleccionada()) {
             return;
         }
@@ -218,17 +218,13 @@ public class ControlGestionCitas implements ActionListener {
             return;
         }
 
-        String detallesAnteriores = cita.getDetallesAtencion();
-        Cita cancelada = ProcesosCita.cancelar(registro.getPendientes(), registro.getHistorial(),
-                cita.getCodCita());
+        ProcesosCita.cancelar(registro.getPendientes(), registro.getHistorial(), cita.getCodCita());
+        actualizarVista();
         try {
             AlmacenarCitas.Guardar(registro);
-            actualizarVista();
             Mensajes.Mostrar("Cita cancelada correctamente.");
         } catch (IOException ex) {
-            ProcesosCita.restaurarPendiente(registro.getPendientes(), registro.getHistorial(),
-                    cancelada, detallesAnteriores);
-            Mensajes.Mostrar("No se pudo guardar la cancelación: " + ex.getMessage());
+            Mensajes.Mostrar("La cita se canceló, pero no se pudo guardar en el archivo: " + ex.getMessage());
         }
     }
 
