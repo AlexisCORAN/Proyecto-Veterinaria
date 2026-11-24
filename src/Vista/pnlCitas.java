@@ -54,6 +54,9 @@ public class pnlCitas extends javax.swing.JPanel {
         jScrollPane1 = new javax.swing.JScrollPane();
         tablaCitas = new javax.swing.JTable();
         panelInferior = new javax.swing.JPanel();
+        panelFitroFechas = new javax.swing.JPanel();
+        filler9 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15), new java.awt.Dimension(0, 15));
+        btnOrdenarFecha = new javax.swing.JButton();
 
         setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
         setLayout(new java.awt.BorderLayout());
@@ -153,7 +156,7 @@ public class pnlCitas extends javax.swing.JPanel {
             javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5)));
     panelBusqueda.add(filler5);
 
-    cboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TODOS", "PENDIENTES", "ATENDIDAS", "CANCELADOS" }));
+    cboEstado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "TODOS", "PENDIENTES", "ATENDIDAS", "CANCELADAS" }));
     cboEstado.setMinimumSize(new java.awt.Dimension(72, 35));
     cboEstado.setPreferredSize(new java.awt.Dimension(72, 35));
     cboEstado.addActionListener(new java.awt.event.ActionListener() {
@@ -216,16 +219,19 @@ public class pnlCitas extends javax.swing.JPanel {
 
     panelPrincipal.add(panelCentral, java.awt.BorderLayout.CENTER);
 
-    javax.swing.GroupLayout panelInferiorLayout = new javax.swing.GroupLayout(panelInferior);
-    panelInferior.setLayout(panelInferiorLayout);
-    panelInferiorLayout.setHorizontalGroup(
-        panelInferiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGap(0, 0, Short.MAX_VALUE)
-    );
-    panelInferiorLayout.setVerticalGroup(
-        panelInferiorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-        .addGap(0, 0, Short.MAX_VALUE)
-    );
+    panelInferior.setBackground(new java.awt.Color(255, 255, 255));
+    panelInferior.setLayout(new javax.swing.BoxLayout(panelInferior, javax.swing.BoxLayout.Y_AXIS));
+
+    panelFitroFechas.setLayout(new java.awt.BorderLayout());
+    panelFitroFechas.add(filler9, java.awt.BorderLayout.LINE_END);
+
+    btnOrdenarFecha.setText("Ordenar por fechas");
+    btnOrdenarFecha.setMaximumSize(new java.awt.Dimension(75, 35));
+    btnOrdenarFecha.setMinimumSize(new java.awt.Dimension(75, 35));
+    btnOrdenarFecha.setPreferredSize(new java.awt.Dimension(75, 35));
+    panelFitroFechas.add(btnOrdenarFecha, java.awt.BorderLayout.PAGE_END);
+
+    panelInferior.add(panelFitroFechas);
 
     panelPrincipal.add(panelInferior, java.awt.BorderLayout.SOUTH);
 
@@ -269,6 +275,7 @@ public class pnlCitas extends javax.swing.JPanel {
     public javax.swing.JButton btnBuscar;
     public javax.swing.JButton btnCancelar;
     public javax.swing.JButton btnNuevo;
+    public javax.swing.JButton btnOrdenarFecha;
     public javax.swing.JComboBox<String> cboEstado;
     private javax.swing.Box.Filler filler1;
     private javax.swing.Box.Filler filler2;
@@ -278,11 +285,13 @@ public class pnlCitas extends javax.swing.JPanel {
     private javax.swing.Box.Filler filler6;
     private javax.swing.Box.Filler filler7;
     private javax.swing.Box.Filler filler8;
+    private javax.swing.Box.Filler filler9;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel nombrePanel;
     private javax.swing.JPanel panelAccionesServicio;
     private javax.swing.JPanel panelBusqueda;
     private javax.swing.JPanel panelCentral;
+    private javax.swing.JPanel panelFitroFechas;
     private javax.swing.JPanel panelInferior;
     private javax.swing.JPanel panelNombre;
     private javax.swing.JPanel panelPrincipal;

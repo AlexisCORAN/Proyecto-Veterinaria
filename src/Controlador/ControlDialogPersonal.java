@@ -9,13 +9,14 @@ import Vista.DialogNuevoPersonal;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Calendar;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.SpinnerDateModel;
-
 
 public class ControlDialogPersonal implements ActionListener {
+
+    private static final SimpleDateFormat FORMATO_FECHA = new SimpleDateFormat("dd/MM/yyyy");
 
     private final DialogNuevoPersonal vista;
     private final ListaPersonal lista;
@@ -26,20 +27,21 @@ public class ControlDialogPersonal implements ActionListener {
         this.vista = vista;
         this.lista = lista;
         this.personalEdicion = personalEdicion;
+
         vista.btnGuardar.addActionListener(this);
         vista.btnCancelar.addActionListener(this);
+
         vista.cboCargo.setModel(new DefaultComboBoxModel<>(new String[]{
             "Veterinario", "Asistente", "Recepcionista", "Administrador"
         }));
-        vista.spinFechaNacimiento.setModel(new SpinnerDateModel(new Date(), null, null, Calendar.DAY_OF_MONTH));
-        vista.spinFechaNacimiento.setEditor(
-                new javax.swing.JSpinner.DateEditor(vista.spinFechaNacimiento, "dd/MM/yyyy"));
+
+        vista.txtCodigoPersonal.setEditable(false);
         if (personalEdicion != null) {
             vista.nombrePanel.setText("Modificar Información del Personal");
-            ProcesosPersonal.MostrarPersonalEnFormulario(vista, personalEdicion);
+            mostrarPersonalEnFormulario(personalEdicion);
         } else {
-            vista.txtCodigoPersonal.setText(ProcesosPersonal.GenerarCodigo(lista));
-            vista.txtCodigoPersonal.setEditable(false);
+            vista.nombrePanel.setText("Registrar Nuevo Personal");
+            vista.txtCodigoPersonal.setText(ProcesosPersonal.generarCodigo(lista));
         }
     }
 
@@ -47,28 +49,83 @@ public class ControlDialogPersonal implements ActionListener {
         return guardadoExitoso;
     }
 
-    private void guardar() throws IOException {
-        if (personalEdicion == null) {
-            Personal nuevo = ProcesosPersonal.RegistrarPersonal(vista, lista);
+    private void mostrarPersonalEnFormulario(Personal p) {
+        vista.txtCodigoPersonal.setText(p.getCodPersonal());
+        vista.txtDniCliente.setText(p.getDni());
+        vista.txtNombresCliente.setText(p.getNombres());
+        vista.txtApellidosCliente.setText(p.getApellidos());
+        vista.txtTelefonoCliente.setText(p.getTelefono());
+        vista.cboCargo.setSelectedItem(p.getCargo());
+
+        String fecha = p.getFechaNacimiento();
+        if (fecha != null && !fecha.isEmpty()) {
             try {
-                AlmacenarPersonal.Guardar(lista);
-            } catch (IOException ex) {
-                lista.Eliminar(nuevo.getCodPersonal());
-                throw ex;
+                vista.spinFechaNacimiento.setValue(FORMATO_FECHA.parse(fecha));
+            } catch (ParseException ex) {
+                Mensajes.Mostrar("La fecha de nacimiento guardada no es válida. Ingrese una nueva.");
             }
-            Mensajes.Mostrar("Personal registrado correctamente.");
-        } else {
-            Personal anterior = ProcesosPersonal.ActualizarPersonalDesdeFormulario(
-                    vista, lista, personalEdicion);
-            try {
-                AlmacenarPersonal.Guardar(lista);
-            } catch (IOException ex) {
-                ProcesosPersonal.RestaurarPersonal(personalEdicion, anterior);
-                throw ex;
-            }
-            Mensajes.Mostrar("Personal actualizado correctamente.");
         }
+    }
+
+    private Personal leerFormulario() {
+        Date fecha = (Date) vista.spinFechaNacimiento.getValue();
+        if (fecha == null) {
+            throw new IllegalArgumentException("Seleccione una fecha de nacimiento válida.");
+        }
+        if (fecha.after(new Date())) {
+            throw new IllegalArgumentException("La fecha de nacimiento no puede ser futura.");
+        }
+        Object cargo = vista.cboCargo.getSelectedItem();
+        return new Personal(
+                vista.txtCodigoPersonal.getText().trim(),
+                vista.txtDniCliente.getText().trim(),
+                vista.txtNombresCliente.getText().trim(),
+                vista.txtApellidosCliente.getText().trim(),
+                vista.txtTelefonoCliente.getText().trim(),
+                FORMATO_FECHA.format(fecha),
+                cargo == null ? "" : cargo.toString());
+    }
+
+    private void guardar() {
+        try {
+            if (personalEdicion == null) {
+                guardarNuevoPersonal();
+            } else {
+                guardarEdicion();
+            }
+        } catch (IllegalArgumentException ex) {
+            Mensajes.Mostrar(ex.getMessage());
+        } catch (IOException ex) {
+            Mensajes.Mostrar("No se pudieron guardar los cambios del personal: " + ex.getMessage());
+        }
+    }
+
+    private void guardarNuevoPersonal() throws IOException {
+        Personal nuevo = leerFormulario();
+        ProcesosPersonal.registrar(lista, nuevo);
+        try {
+            AlmacenarPersonal.Guardar(lista);
+        } catch (IOException ex) {
+            lista.Eliminar(nuevo.getCodPersonal());
+            throw ex;
+        }
+        finalizar("Personal registrado correctamente.");
+    }
+
+    private void guardarEdicion() throws IOException {
+        Personal copiaAnterior = ProcesosPersonal.actualizar(lista, personalEdicion, leerFormulario());
+        try {
+            AlmacenarPersonal.Guardar(lista);
+        } catch (IOException ex) {
+            ProcesosPersonal.revertir(personalEdicion, copiaAnterior);
+            throw ex;
+        }
+        finalizar("Personal actualizado correctamente.");
+    }
+
+    private void finalizar(String mensaje) {
         guardadoExitoso = true;
+        Mensajes.Mostrar(mensaje);
         vista.dispose();
     }
 
@@ -77,13 +134,7 @@ public class ControlDialogPersonal implements ActionListener {
         if (e.getSource() == vista.btnCancelar) {
             vista.dispose();
         } else if (e.getSource() == vista.btnGuardar) {
-            try {
-                guardar();
-            } catch (IllegalArgumentException ex) {
-                Mensajes.Mostrar(ex.getMessage());
-            } catch (IOException ex) {
-                Mensajes.Mostrar("No se pudieron guardar los cambios del personal: " + ex.getMessage());
-            }
+            guardar();
         }
     }
 }

@@ -49,7 +49,8 @@ public class frmMenu extends javax.swing.JFrame {
         setMinimumSize(new java.awt.Dimension(940, 600));
         setPreferredSize(new java.awt.Dimension(940, 600));
 
-        panelSidebar.setBackground(new java.awt.Color(102, 255, 102));
+        panelSidebar.setBackground(new java.awt.Color(0, 102, 102));
+        panelSidebar.setForeground(new java.awt.Color(255, 255, 255));
         panelSidebar.setLayout(new java.awt.BorderLayout());
 
         panelSuperior.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -60,6 +61,7 @@ public class frmMenu extends javax.swing.JFrame {
         panelNombre.setLayout(new java.awt.BorderLayout());
 
         lblNombrePanel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        lblNombrePanel.setForeground(new java.awt.Color(255, 255, 255));
         lblNombrePanel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblNombrePanel.setText("SISTEMA DE GESTIÓN");
         panelNombre.add(lblNombrePanel, java.awt.BorderLayout.CENTER);

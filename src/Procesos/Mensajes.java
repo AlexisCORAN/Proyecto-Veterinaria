@@ -1,8 +1,6 @@
-
 package Procesos;
 
 import javax.swing.JOptionPane;
-
 
 public class Mensajes {
 
@@ -14,7 +12,8 @@ public class Mensajes {
         return JOptionPane.showInputDialog(msj);
     }
 
-    public static int Preguntar(String titulo, String msj) {
-        return JOptionPane.showConfirmDialog(null, msj, titulo, JOptionPane.OK_CANCEL_OPTION);
+    public static boolean Preguntar(String titulo, String msj) {
+        return JOptionPane.showConfirmDialog(null, msj, titulo,
+                JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION;
     }
 }

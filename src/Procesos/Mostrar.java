@@ -1,158 +1,191 @@
-
 package Procesos;
 
-import EstructuraArrayList.ListaServicios;
 import Colas.ColaCitas;
 import Entidades.Cita;
+import Entidades.Cliente;
+import Entidades.Mascota;
+import Entidades.Personal;
+import Entidades.Servicio;
+import EstructuraArrayList.ListaServicios;
 import ListaEnlazadas.ListaClientes;
 import ListaEnlazadas.NodoCliente;
 import ListasDoblesEnlazadas.ListaMascotas;
 import ListasDoblesEnlazadas.ListaPersonal;
 import ListasDoblesEnlazadas.NodoMascota;
 import ListasDoblesEnlazadas.NodoPersonal;
+import Ordenamientos.OrdenarFechas;
 import Pilas.PilaCitas;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-
 public class Mostrar {
 
-    public static void DatosClientes(JTable tabla, ListaClientes lista) {
-        DatosClientes(tabla, lista, "TODOS");
-    }
+    private static final String[] TITULOS_CLIENTES = {"Nro", "Código", "DNI", "Nombres",
+        "Apellidos", "Teléfono", "Fecha de nacimiento", "Estado"};
+    private static final String[] TITULOS_PERSONAL = {"Nro", "Código", "DNI", "Nombres",
+        "Apellidos", "Teléfono", "Fecha de nacimiento", "Cargo", "Estado"};
+    private static final String[] TITULOS_MASCOTAS = {"Nro", "Código", "Nombre", "Especie",
+        "Raza", "Cod. Cliente", "Estado"};
+    private static final String[] TITULOS_SERVICIOS = {"Nro", "Código", "Nombre",
+        "Descripción", "Precio (S/)", "Estado"};
+    private static final String[] TITULOS_CITAS = {"Código", "Fecha", "Hora",
+        "Cód. Mascota", "Estado", "Total (S/)"};
 
-    public static void DatosClientes(JTable tabla, ListaClientes lista, String estado) {
-        String[] titulos = {"Nro", "Código", "DNI", "Nombres", "Apellidos", "Teléfono",
-            "Fecha de nacimiento", "Estado"};
-        DefaultTableModel mt = new DefaultTableModel(null, titulos) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        tabla.setModel(mt);
+    public static void DatosClientes(JTable tabla, ListaClientes lista, String estado, String textoBusqueda) {
+        DefaultTableModel modelo = modeloSoloLectura(TITULOS_CLIENTES);
+        String filtro = normalizarFiltro(textoBusqueda);
 
-        int num = 0;
-        NodoCliente aux = lista.ini;
-        while (aux != null) {
-            boolean mostrar = "TODOS".equalsIgnoreCase(estado)
-                    || ("ACTIVOS".equalsIgnoreCase(estado) && aux.cliente.isActivo())
-                    || ("RETIRADOS".equalsIgnoreCase(estado) && !aux.cliente.isActivo());
-            if (mostrar) {
-                num++;
-                mt.addRow(aux.cliente.Registro(num));
-            }
-            aux = aux.sig;
-        }
-    }
-
-    public static void DatosPersonal(JTable tabla, ListaPersonal lista) {
-        DatosPersonal(tabla, lista, "TODOS");
-    }
-
-    public static void DatosPersonal(JTable tabla, ListaPersonal lista, String estado) {
-        String[] titulos = {"Nro", "Código", "DNI", "Nombres", "Apellidos", "Teléfono",
-            "Fecha de nacimiento", "Cargo", "Estado"};
-        DefaultTableModel mt = ModeloSoloLectura(titulos);
-        tabla.setModel(mt);
-
-        int num = 0;
-        NodoPersonal aux = lista.ini;
-        while (aux != null) {
-            boolean mostrar = MostrarEstado(estado, aux.personal.isActivo());
-            if (mostrar) {
-                mt.addRow(aux.personal.Registro(++num));
-            }
-            aux = aux.sig;
-        }
-    }
-
-    public static void DatosMascotas(JTable tabla, ListaMascotas lista) {
-        DatosMascotas(tabla, lista, "TODOS");
-    }
-
-    public static void DatosMascotas(JTable tabla, ListaMascotas lista, String estado) {
-        String[] titulos = {"Nro", "Código", "Nombre", "Especie", "Raza", "Cod. Cliente", "Estado"};
-        DefaultTableModel mt = ModeloSoloLectura(titulos);
-        tabla.setModel(mt);
-
-        int num = 0;
-        NodoMascota aux = lista.ini;
-        while (aux != null) {
-            boolean mostrar = MostrarEstado(estado, aux.mascota.isActivo());
-            if (mostrar) {
-                mt.addRow(aux.mascota.Registro(++num));
-            }
-            aux = aux.sig;
-        }
-    }
-
-    public static void DatosServicios(JTable tabla, ListaServicios lista) {
-        DatosServicios(tabla, lista, "TODOS");
-    }
-
-    public static void DatosServicios(JTable tabla, ListaServicios lista, String estado) {
-        String[] titulos = {"Nro", "Código", "Nombre", "Descripción", "Precio (S/)", "Estado"};
-        DefaultTableModel mt = ModeloSoloLectura(titulos);
-        tabla.setModel(mt);
-
-        int num = 0;
-        for (int i = 0; i < lista.Cantidad(); i++) {
-            var servicio = lista.getServicios().get(i);
-            if (MostrarEstado(estado, servicio.isActivo())) {
-                mt.addRow(servicio.Registro(++num));
+        int numero = 0;
+        for (NodoCliente actual = lista.ini; actual != null; actual = actual.sig) {
+            Cliente c = actual.cliente;
+            if (coincideEstado(estado, c.isActivo()) && coincideBusquedaCliente(c, filtro)) {
+                modelo.addRow(c.Registro(++numero));
             }
         }
-    }
-
-    public static void DatosCitas(javax.swing.JTable tabla, ColaCitas pendientes, PilaCitas historial, String filtroEstado) {
-        String[] columnas = {"Código", "Fecha", "Hora", "Cód. Paciente", "Estado", "Total (S/)"};
-
-        javax.swing.table.DefaultTableModel modelo = new javax.swing.table.DefaultTableModel(null, columnas) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; 
-            }
-        };
-
-        List<Cita> listaPendientes = pendientes.getCitas();
-        for (Cita c : listaPendientes) {
-            if (filtroEstado.equals("TODOS") || filtroEstado.equals("PENDIENTES")) {
-                modelo.addRow(new Object[]{
-                    c.getCodCita(), c.getFecha(), c.getHora(),
-                    c.getCodMascota(), c.getEstado(), c.getTotal()
-                });
-            }
-        }
-
-        List<Cita> listaHistorial = historial.getCitas();
-        for (Cita c : listaHistorial) {
-            String estadoCita = c.getEstado() != null ? c.getEstado().trim() : "";
-            
-            boolean coincideFiltro = filtroEstado.equals("TODOS") ||
-                    (filtroEstado.equals("ATENDIDAS") && estadoCita.equalsIgnoreCase("Atendida")) ||
-                    (filtroEstado.equals("CANCELADAS") && estadoCita.equalsIgnoreCase("Cancelada")) ||
-                    estadoCita.equalsIgnoreCase(filtroEstado);
-
-            if (coincideFiltro) {
-                modelo.addRow(new Object[]{
-                    c.getCodCita(), c.getFecha(), c.getHora(),
-                    c.getCodMascota(), c.getEstado(), c.getTotal()
-                });
-            }
-        }
-
         tabla.setModel(modelo);
     }
 
-    private static boolean MostrarEstado(String filtro, boolean activo) {
-        return "TODOS".equalsIgnoreCase(filtro)
-                || "ACTIVOS".equalsIgnoreCase(filtro) && activo
-                || "RETIRADOS".equalsIgnoreCase(filtro) && !activo;
+    private static boolean coincideBusquedaCliente(Cliente c, String filtro) {
+        if (filtro.isEmpty()) {
+            return true;
+        }
+        String nombreCompleto = (c.getNombres() + " " + c.getApellidos()).toLowerCase();
+        return c.getCodCliente().toLowerCase().contains(filtro)
+                || c.getDni().toLowerCase().contains(filtro)
+                || nombreCompleto.contains(filtro);
     }
 
-    private static DefaultTableModel ModeloSoloLectura(String[] titulos) {
+    public static void DatosPersonal(JTable tabla, ListaPersonal lista, String estado, String textoBusqueda) {
+        DefaultTableModel modelo = modeloSoloLectura(TITULOS_PERSONAL);
+        String filtro = normalizarFiltro(textoBusqueda);
+
+        int numero = 0;
+        for (NodoPersonal actual = lista.ini; actual != null; actual = actual.sig) {
+            Personal p = actual.personal;
+            if (coincideEstado(estado, p.isActivo()) && coincideBusquedaPersonal(p, filtro)) {
+                modelo.addRow(p.Registro(++numero));
+            }
+        }
+        tabla.setModel(modelo);
+    }
+
+    private static boolean coincideBusquedaPersonal(Personal p, String filtro) {
+        if (filtro.isEmpty()) {
+            return true;
+        }
+        String nombreCompleto = (p.getNombres() + " " + p.getApellidos()).toLowerCase();
+        return p.getCodPersonal().toLowerCase().contains(filtro)
+                || p.getDni().toLowerCase().contains(filtro)
+                || nombreCompleto.contains(filtro)
+                || p.getCargo().toLowerCase().contains(filtro);
+    }
+
+    public static void DatosMascotas(JTable tabla, ListaMascotas lista, String estado, String textoBusqueda) {
+        DefaultTableModel modelo = modeloSoloLectura(TITULOS_MASCOTAS);
+        String filtro = normalizarFiltro(textoBusqueda);
+
+        int numero = 0;
+        for (NodoMascota actual = lista.ini; actual != null; actual = actual.sig) {
+            Mascota m = actual.mascota;
+            if (coincideEstado(estado, m.isActivo()) && coincideBusquedaMascota(m, filtro)) {
+                modelo.addRow(m.Registro(++numero));
+            }
+        }
+        tabla.setModel(modelo);
+    }
+
+    private static boolean coincideBusquedaMascota(Mascota m, String filtro) {
+        if (filtro.isEmpty()) {
+            return true;
+        }
+        return m.getCodMascota().toLowerCase().contains(filtro)
+                || m.getNombre().toLowerCase().contains(filtro)
+                || m.getCodCliente().toLowerCase().contains(filtro);
+    }
+
+    public static void DatosServicios(JTable tabla, ListaServicios lista, String estado, String textoBusqueda) {
+        DefaultTableModel modelo = modeloSoloLectura(TITULOS_SERVICIOS);
+        String filtro = normalizarFiltro(textoBusqueda);
+
+        int numero = 0;
+        for (Servicio s : lista.getServicios()) {
+            if (coincideEstado(estado, s.isActivo()) && coincideBusquedaServicio(s, filtro)) {
+                modelo.addRow(s.Registro(++numero));
+            }
+        }
+        tabla.setModel(modelo);
+    }
+
+    private static boolean coincideBusquedaServicio(Servicio s, String filtro) {
+        if (filtro.isEmpty()) {
+            return true;
+        }
+        return s.getCodServicio().toLowerCase().contains(filtro)
+                || s.getNombre().toLowerCase().contains(filtro)
+                || s.getDescripcion().toLowerCase().contains(filtro);
+    }
+
+    public static void DatosCitas(JTable tabla, ColaCitas pendientes, PilaCitas historial,
+            String filtroEstado, String textoBusqueda, boolean ordenAscendente) {
+        DefaultTableModel modelo = modeloSoloLectura(TITULOS_CITAS);
+        String filtro = normalizarFiltro(textoBusqueda);
+        List<Cita> visibles = new ArrayList<>();
+
+        if ("TODOS".equalsIgnoreCase(filtroEstado) || "PENDIENTES".equalsIgnoreCase(filtroEstado)) {
+            for (Cita c : pendientes.getCitas()) {
+                if (coincideBusquedaCita(c, filtro)) {
+                    visibles.add(c);
+                }
+            }
+        }
+
+        for (Cita c : historial.getCitas()) {
+            if (coincideEstadoCita(filtroEstado, c) && coincideBusquedaCita(c, filtro)) {
+                visibles.add(c);
+            }
+        }
+
+        OrdenarFechas.porFechaHora(visibles, ordenAscendente);
+
+        for (Cita c : visibles) {
+            modelo.addRow(filaCita(c));
+        }
+        tabla.setModel(modelo);
+    }
+
+    private static boolean coincideEstadoCita(String filtroEstado, Cita c) {
+        String estadoCita = c.getEstado() == null ? "" : c.getEstado().trim();
+        return "TODOS".equalsIgnoreCase(filtroEstado)
+                || ("ATENDIDAS".equalsIgnoreCase(filtroEstado) && estadoCita.equalsIgnoreCase("Atendida"))
+                || ("CANCELADAS".equalsIgnoreCase(filtroEstado) && estadoCita.equalsIgnoreCase("Cancelada"));
+    }
+
+    private static boolean coincideBusquedaCita(Cita c, String filtro) {
+        if (filtro.isEmpty()) {
+            return true;
+        }
+        return c.getCodCita().toLowerCase().contains(filtro)
+                || c.getCodMascota().toLowerCase().contains(filtro);
+    }
+
+    private static Object[] filaCita(Cita c) {
+        return new Object[]{c.getCodCita(), c.getFecha(), c.getHora(),
+            c.getCodMascota(), c.getEstado(), String.format("%.2f", c.getTotal())};
+    }
+
+    private static String normalizarFiltro(String texto) {
+        return texto == null ? "" : texto.trim().toLowerCase();
+    }
+
+    private static boolean coincideEstado(String estado, boolean activo) {
+        return "TODOS".equalsIgnoreCase(estado)
+                || ("ACTIVOS".equalsIgnoreCase(estado) && activo)
+                || ("RETIRADOS".equalsIgnoreCase(estado) && !activo);
+    }
+
+    private static DefaultTableModel modeloSoloLectura(String[] titulos) {
         return new DefaultTableModel(null, titulos) {
             @Override
             public boolean isCellEditable(int fila, int columna) {

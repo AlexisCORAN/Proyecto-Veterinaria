@@ -1,42 +1,31 @@
-
 package Procesos;
 
-import EstructuraArrayList.ListaServicios;
 import Entidades.Servicio;
-import Vista.DialogNuevoServicio;
-import Vista.pnlServicio;
+import EstructuraArrayList.ListaServicios;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ProcesosServicio {
 
-    public static void LimpiarEntradas(pnlServicio vista) {
-        vista.txtBuscar.setText("Buscar por Código");
+    public static void validar(Servicio s) {
+        if (s == null) {
+            throw new IllegalArgumentException("Los datos del servicio son obligatorios.");
+        }
+        String nombre = textoSeguro(s.getNombre());
+        String descripcion = textoSeguro(s.getDescripcion());
+
+        if (nombre.isEmpty()) {
+            throw new IllegalArgumentException("El nombre del servicio es obligatorio.");
+        }
+        if (descripcion.isEmpty()) {
+            throw new IllegalArgumentException("La descripción del servicio es obligatoria.");
+        }
+        if (!Double.isFinite(s.getPrecio()) || s.getPrecio() <= 0) {
+            throw new IllegalArgumentException("El precio debe ser un número mayor que cero.");
+        }
     }
 
-    public static Servicio LeerServicioDesdeFormulario(DialogNuevoServicio vista) {
-        String codigo = vista.txtCodigoServicio.getText().trim();
-        String nombre = vista.txtNombreServicio.getText().trim();
-        String descripcion = vista.txtDescripcionServicio.getText().trim();
-        String precioTexto = vista.txtPrecioServicio.getText().trim().replace(',', '.');
-        if (nombre.isEmpty() || descripcion.isEmpty() || precioTexto.isEmpty()) {
-            throw new IllegalArgumentException("Nombre, descripción y precio son obligatorios.");
-        }
-
-        double precio;
-        try {
-            precio = Double.parseDouble(precioTexto);
-        } catch (NumberFormatException ex) {
-            throw new IllegalArgumentException("El precio debe ser un número válido.", ex);
-        }
-        if (!Double.isFinite(precio) || precio <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor que cero.");
-        }
-        return new Servicio(codigo, nombre, descripcion, precio);
-    }
-
-    public static String GenerarCodigo(ListaServicios lista) {
+    public static String generarCodigo(ListaServicios lista) {
         List<String> codigos = new ArrayList<>();
         for (Servicio servicio : lista.getServicios()) {
             codigos.add(servicio.getCodServicio());
@@ -44,68 +33,57 @@ public class ProcesosServicio {
         return GeneradorCodigos.Siguiente("SER-", codigos);
     }
 
-    public static Servicio RegistrarServicio(DialogNuevoServicio vista, ListaServicios lista) {
-        Servicio datos = LeerServicioDesdeFormulario(vista);
-        String codigo = GenerarCodigo(lista);
-        vista.txtCodigoServicio.setText(codigo);
-        Servicio nuevo = new Servicio(codigo, datos.getNombre(), datos.getDescripcion(), datos.getPrecio());
-        if (lista.Buscar(nuevo.getCodServicio()) != null) {
-            throw new IllegalArgumentException("Ya existe un servicio con ese código.");
+    public static void registrar(ListaServicios lista, Servicio nuevo) {
+        validar(nuevo);
+        if (buscarPorNombre(lista, nuevo.getNombre()) != null) {
+            throw new IllegalArgumentException("Ya existe un servicio registrado con ese nombre.");
         }
         lista.Insertar(nuevo);
-        return nuevo;
     }
 
-    public static Servicio ActualizarServicioDesdeFormulario(
-            DialogNuevoServicio vista, ListaServicios lista, Servicio servicio) {
-        if (servicio == null) {
-            throw new IllegalArgumentException("Debe seleccionar un servicio para editar.");
+    public static Servicio actualizar(ListaServicios lista, Servicio original, Servicio datos) {
+        validar(datos);
+        Servicio conMismoNombre = buscarPorNombre(lista, datos.getNombre());
+        if (conMismoNombre != null && conMismoNombre != original) {
+            throw new IllegalArgumentException("Ya existe otro servicio registrado con ese nombre.");
         }
-        Servicio datos = LeerServicioDesdeFormulario(vista);
-        if (!servicio.getCodServicio().equalsIgnoreCase(datos.getCodServicio())) {
-            throw new IllegalArgumentException("El código del servicio no se puede modificar.");
-        }
-
-        Servicio anterior = Copiar(servicio);
-        Aplicar(servicio, datos);
-        return anterior;
-    }
-
-    public static boolean DesactivarServicio(ListaServicios lista, Servicio servicio) {
-        if (lista == null || servicio == null || !servicio.isActivo()) {
-            return false;
-        }
-        return lista.Buscar(servicio.getCodServicio()) == servicio
-                && lista.Desactivar(servicio.getCodServicio());
-    }
-
-    public static void RestaurarEstado(Servicio servicio, boolean activoAnterior) {
-        servicio.setActivo(activoAnterior);
-    }
-
-    public static void RestaurarServicio(Servicio servicio, Servicio anterior) {
-        Aplicar(servicio, anterior);
-        servicio.setActivo(anterior.isActivo());
-    }
-
-    public static void MostrarServicioEnFormulario(DialogNuevoServicio vista, Servicio servicio) {
-        vista.txtCodigoServicio.setEditable(false);
-        vista.txtCodigoServicio.setText(servicio.getCodServicio());
-        vista.txtNombreServicio.setText(servicio.getNombre());
-        vista.txtDescripcionServicio.setText(servicio.getDescripcion());
-        vista.txtPrecioServicio.setText(String.valueOf(servicio.getPrecio()));
-    }
-
-    private static Servicio Copiar(Servicio servicio) {
-        Servicio copia = new Servicio(servicio.getCodServicio(), servicio.getNombre(),
-                servicio.getDescripcion(), servicio.getPrecio());
-        copia.setActivo(servicio.isActivo());
+        Servicio copia = copiar(original);
+        copiarDatos(datos, original);
         return copia;
     }
 
-    private static void Aplicar(Servicio destino, Servicio origen) {
-        destino.setNombre(origen.getNombre());
-        destino.setDescripcion(origen.getDescripcion());
+    public static void revertir(Servicio servicio, Servicio copiaAnterior) {
+        copiarDatos(copiaAnterior, servicio);
+    }
+
+    public static boolean desactivar(ListaServicios lista, Servicio servicio) {
+        return servicio.isActivo() && lista.Desactivar(servicio.getCodServicio());
+    }
+
+    private static Servicio buscarPorNombre(ListaServicios lista, String nombre) {
+        String nombreBuscado = textoSeguro(nombre);
+        for (Servicio s : lista.getServicios()) {
+            if (textoSeguro(s.getNombre()).equalsIgnoreCase(nombreBuscado)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+    private static void copiarDatos(Servicio origen, Servicio destino) {
+        destino.setNombre(textoSeguro(origen.getNombre()));
+        destino.setDescripcion(textoSeguro(origen.getDescripcion()));
         destino.setPrecio(origen.getPrecio());
+    }
+
+    private static Servicio copiar(Servicio s) {
+        Servicio copia = new Servicio(s.getCodServicio(), s.getNombre(),
+                s.getDescripcion(), s.getPrecio());
+        copia.setActivo(s.isActivo());
+        return copia;
+    }
+
+    private static String textoSeguro(String valor) {
+        return valor == null ? "" : valor.trim();
     }
 }

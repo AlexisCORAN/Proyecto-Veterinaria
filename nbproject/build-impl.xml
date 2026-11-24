@@ -19,6 +19,23 @@ is divided into following sections:
   - cleanup
 
         -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <project xmlns:if="ant:if" xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1" xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3" xmlns:jaxrpc="http://www.netbeans.org/ns/j2se-project/jax-rpc" xmlns:unless="ant:unless" basedir=".." default="default" name="ProyectoVeterinaria-impl">
     <fail message="Please build using Ant 1.8.0 or higher.">
         <condition>
@@ -28,28 +45,62 @@ is divided into following sections:
         </condition>
     </fail>
     <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
-    <!-- 
+    <!--
                 ======================
-                INITIALIZATION SECTION 
+                INITIALIZATION SECTION
                 ======================
             -->
+
+
+
+
+
     <target name="-pre-init">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="-pre-init" name="-init-private">
         <property file="nbproject/private/config.properties"/>
         <property file="nbproject/private/configs/${config}.properties"/>
         <property file="nbproject/private/private.properties"/>
     </target>
-    <target depends="-pre-init,-init-private" name="-init-user">
+    <target name="-pre-init-libraries">
+        <property location=".\lib\nblibraries.properties" name="libraries.path"/>
+        <dirname file="${libraries.path}" property="libraries.dir.nativedirsep"/>
+        <pathconvert dirsep="/" property="libraries.dir">
+            <path path="${libraries.dir.nativedirsep}"/>
+        </pathconvert>
+        <basename file="${libraries.path}" property="libraries.basename" suffix=".properties"/>
+        <available file="${libraries.dir}/${libraries.basename}-private.properties" property="private.properties.available"/>
+    </target>
+    <target depends="-pre-init-libraries" if="private.properties.available" name="-init-private-libraries">
+        <loadproperties encoding="ISO-8859-1" srcfile="${libraries.dir}/${libraries.basename}-private.properties">
+            <filterchain>
+                <replacestring from="$${base}" to="${libraries.dir}"/>
+                <escapeunicode/>
+            </filterchain>
+        </loadproperties>
+    </target>
+    <target depends="-pre-init,-init-private,-init-private-libraries" name="-init-libraries">
+        <loadproperties encoding="ISO-8859-1" srcfile="${libraries.path}">
+            <filterchain>
+                <replacestring from="$${base}" to="${libraries.dir}"/>
+                <escapeunicode/>
+            </filterchain>
+        </loadproperties>
+    </target>
+    <target depends="-pre-init,-init-private,-init-libraries" name="-init-user">
         <property file="${user.properties.file}"/>
         <!-- The two properties below are usually overridden -->
         <!-- by the active platform. Just a fallback. -->
+
+
         <property name="default.javac.source" value="1.8"/>
         <property name="default.javac.target" value="1.8"/>
     </target>
-    <target depends="-pre-init,-init-private,-init-user" name="-init-project">
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user" name="-init-project">
         <property file="nbproject/configs/${config}.properties"/>
         <property file="nbproject/project.properties"/>
     </target>
@@ -118,7 +169,7 @@ is divided into following sections:
         <property name="dist.jlink.output" value="${dist.jlink.dir}/${application.title}"/>
         <property name="module.name" value=""/>
     </target>
-    <target depends="-pre-init,-init-private,-init-user,-init-project,-init-macrodef-property,-init-modules-supported" name="-do-init">
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user,-init-project,-init-macrodef-property,-init-modules-supported" name="-do-init">
         <property name="platform.java" value="${java.home}/bin/java"/>
         <available file="${manifest.file}" property="manifest.available"/>
         <condition property="splashscreen.available">
@@ -286,8 +337,10 @@ is divided into following sections:
     <target name="-post-init">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
-    <target depends="-pre-init,-init-private,-init-user,-init-project,-do-init" name="-init-check">
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user,-init-project,-do-init" name="-init-check">
         <fail unless="src.dir">Must set src.dir</fail>
         <fail unless="test.src.dir">Must set test.src.dir</fail>
         <fail unless="build.dir">Must set build.dir</fail>
@@ -788,14 +841,21 @@ is divided into following sections:
     <!--
                 pre NB7.2 profiling section; consider it deprecated
             -->
+
+
+
     <target depends="-profile-pre-init, init, -profile-post-init, -profile-init-macrodef-profile, -profile-init-check" if="profiler.info.jvmargs.agent" name="profile-init"/>
     <target if="profiler.info.jvmargs.agent" name="-profile-pre-init">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target if="profiler.info.jvmargs.agent" name="-profile-post-init">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target if="profiler.info.jvmargs.agent" name="-profile-init-macrodef-profile">
         <macrodef name="resolve">
@@ -836,6 +896,9 @@ is divided into following sections:
     <!--
                 end of pre NB7.2 profiling section
             -->
+
+
+
     <target depends="-init-debug-args" name="-init-macrodef-nbjpda">
         <macrodef name="nbjpdastart" uri="http://www.netbeans.org/ns/j2se-project/1">
             <attribute default="${main.class}" name="name"/>
@@ -1046,12 +1109,17 @@ is divided into following sections:
     <target depends="-init-ap-cmdline-properties,-init-ap-cmdline-supported" name="-init-ap-cmdline">
         <property name="ap.cmd.line.internal" value=""/>
     </target>
-    <target depends="-pre-init,-init-private,-init-user,-init-project,-do-init,-post-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-test,-init-macrodef-test-debug,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java,-init-presetdef-jar,-init-ap-cmdline" name="init"/>
     <!--
                 ===================
                 COMPILATION SECTION
                 ===================
             -->
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user,-init-project,-do-init,-post-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-test,-init-macrodef-test-debug,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java,-init-presetdef-jar,-init-ap-cmdline" name="init"/>
+
+
+
+
+
     <target name="-deps-jar-init" unless="built-jar.properties">
         <property location="${build.dir}/built-jar.properties" name="built-jar.properties"/>
         <delete file="${built-jar.properties}" quiet="true"/>
@@ -1083,6 +1151,8 @@ is divided into following sections:
     <target name="-pre-compile">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target if="do.depend.true" name="-compile-depend">
         <pathconvert property="build.generated.subdirs">
@@ -1107,11 +1177,15 @@ is divided into following sections:
     <target name="-post-compile">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,deps-jar,-verify-automatic-build,-pre-pre-compile,-pre-compile,-do-compile,-post-compile" description="Compile project." name="compile"/>
     <target name="-pre-compile-single">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,deps-jar,-pre-pre-compile" name="-do-compile-single">
         <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
@@ -1121,6 +1195,8 @@ is divided into following sections:
     <target name="-post-compile-single">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,deps-jar,-verify-automatic-build,-pre-pre-compile,-pre-compile-single,-do-compile-single,-post-compile-single" name="compile-single"/>
     <!--
@@ -1128,6 +1204,11 @@ is divided into following sections:
                 JAR BUILDING SECTION
                 ====================
             -->
+
+
+
+
+
     <target depends="init" name="-pre-pre-jar">
         <dirname file="${dist.jar}" property="dist.jar.dir"/>
         <mkdir dir="${dist.jar.dir}"/>
@@ -1135,6 +1216,8 @@ is divided into following sections:
     <target name="-pre-jar">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,compile" name="-check-module-main-class">
         <pathconvert property="main.class.file">
@@ -1253,6 +1336,8 @@ is divided into following sections:
     <target name="-post-jar">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,compile,-pre-jar,-set-module-main-class,-do-jar-without-libraries,-do-jar-with-libraries,-post-jar" name="-do-jar"/>
     <target depends="init,compile,-pre-jar,-do-jar,-post-jar,deploy" description="Build JAR." name="jar"/>
@@ -1261,9 +1346,16 @@ is divided into following sections:
                 DEPLOY SECTION
                 =================
             -->
+
+
+
+
+
     <target name="-pre-deploy">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init" name="-check-jlink">
         <condition property="do.jlink.internal">
@@ -1319,6 +1411,8 @@ is divided into following sections:
     <target name="-post-deploy">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="-do-jar,-post-jar,-pre-deploy,-do-deploy,-post-deploy" name="deploy"/>
     <!--
@@ -1326,6 +1420,11 @@ is divided into following sections:
                 EXECUTION SECTION
                 =================
             -->
+
+
+
+
+
     <target depends="init,compile" description="Run a main class." name="run">
         <j2seproject1:java>
             <customize>
@@ -1349,6 +1448,11 @@ is divided into following sections:
                 DEBUGGING SECTION
                 =================
             -->
+
+
+
+
+
     <target depends="init" if="netbeans.home" name="-debug-start-debugger">
         <j2seproject1:nbjpdastart name="${debug.class}"/>
     </target>
@@ -1393,6 +1497,14 @@ is divided into following sections:
     <!--
                 pre NB7.2 profiler integration
             -->
+
+
+
+
+
+
+
+
     <target depends="profile-init,compile" description="Profile a project in the IDE." if="profiler.info.jvmargs.agent" name="-profile-pre72">
         <fail unless="netbeans.home">This target only works when run from inside the NetBeans IDE.</fail>
         <nbprofiledirect>
@@ -1447,6 +1559,9 @@ is divided into following sections:
     <!--
                 end of pre NB72 profiling section
             -->
+
+
+
     <target if="netbeans.home" name="-profile-check">
         <condition property="profiler.configured">
             <or>
@@ -1485,6 +1600,11 @@ is divided into following sections:
                 JAVADOC SECTION
                 ===============
             -->
+
+
+
+
+
     <target depends="init" if="have.sources" name="-javadoc-build">
         <mkdir dir="${dist.javadoc.dir}"/>
         <condition else="" property="javadoc.endorsed.classpath.cmd.line.arg" value="-J${endorsed.classpath.cmd.line.arg}">
@@ -1536,12 +1656,19 @@ is divided into following sections:
                 TEST COMPILATION SECTION
                 =========================
             -->
+
+
+
+
+
     <target depends="init,compile" if="have.tests" name="-pre-pre-compile-test">
         <mkdir dir="${build.test.classes.dir}"/>
     </target>
     <target name="-pre-compile-test">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="-init-source-module-properties" if="named.module.internal" name="-init-test-javac-module-properties-with-module">
         <j2seproject3:modulename property="test.module.name" sourcepath="${test.src.dir}"/>
@@ -1607,11 +1734,15 @@ is divided into following sections:
     <target name="-post-compile-test">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,compile,-pre-pre-compile-test,-pre-compile-test,-do-compile-test,-post-compile-test" name="compile-test"/>
     <target name="-pre-compile-test-single">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,deps-jar,compile,-init-test-module-properties,-pre-pre-compile-test,-pre-compile-test-single" if="have.tests" name="-do-compile-test-single">
         <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
@@ -1628,6 +1759,8 @@ is divided into following sections:
     <target name="-post-compile-test-single">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,compile,-pre-pre-compile-test,-pre-compile-test-single,-do-compile-test-single,-post-compile-test-single" name="compile-test-single"/>
     <!--
@@ -1635,6 +1768,11 @@ is divided into following sections:
                 TEST EXECUTION SECTION
                 =======================
             -->
+
+
+
+
+
     <target depends="init" if="have.tests" name="-pre-test-run">
         <mkdir dir="${build.test.results.dir}"/>
     </target>
@@ -1672,6 +1810,11 @@ is divided into following sections:
                 TEST DEBUGGING SECTION
                 =======================
             -->
+
+
+
+
+
     <target depends="init,compile-test-single,-pre-test-run-single" if="have.tests" name="-debug-start-debuggee-test">
         <fail unless="test.class">Must select one file in the IDE or set test.class</fail>
         <j2seproject3:test-debug excludes="" includes="${javac.includes}" testClass="${test.class}" testincludes="${javac.includes}"/>
@@ -1696,6 +1839,11 @@ is divided into following sections:
                 APPLET EXECUTION SECTION
                 =========================
             -->
+
+
+
+
+
     <target depends="init,compile-single" name="run-applet">
         <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>
         <j2seproject1:java classname="sun.applet.AppletViewer">
@@ -1709,6 +1857,11 @@ is divided into following sections:
                 APPLET DEBUGGING  SECTION
                 =========================
             -->
+
+
+
+
+
     <target depends="init,compile-single" if="netbeans.home" name="-debug-start-debuggee-applet">
         <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>
         <j2seproject3:debug classname="sun.applet.AppletViewer">
@@ -1723,6 +1876,11 @@ is divided into following sections:
                 CLEANUP SECTION
                 ===============
             -->
+
+
+
+
+
     <target name="-deps-clean-init" unless="built-clean.properties">
         <property location="${build.dir}/built-clean.properties" name="built-clean.properties"/>
         <delete file="${built-clean.properties}" quiet="true"/>
@@ -1747,6 +1905,8 @@ is divided into following sections:
     <target name="-post-clean">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
+
+
     </target>
     <target depends="init,deps-clean,-do-clean,-post-clean" description="Clean build products." name="clean"/>
     <target name="-check-call-dep">

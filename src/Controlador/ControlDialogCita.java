@@ -4,13 +4,13 @@ import Entidades.Cita;
 import Entidades.Mascota;
 import Entidades.Personal;
 import Entidades.Servicio;
+import EstructuraArrayList.ListaServicios;
 import ListaEnlazadas.ListaClientes;
 import ListaEnlazadas.NodoCliente;
 import ListasDoblesEnlazadas.ListaMascotas;
-import ListasDoblesEnlazadas.NodoMascota;
 import ListasDoblesEnlazadas.ListaPersonal;
+import ListasDoblesEnlazadas.NodoMascota;
 import ListasDoblesEnlazadas.NodoPersonal;
-import EstructuraArrayList.ListaServicios;
 import Persistencia.AlmacenarCitas;
 import Persistencia.AlmacenarCitas.RegistroCitas;
 import Procesos.Mensajes;
@@ -19,6 +19,7 @@ import Vista.DialogNuevaCita;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,11 +28,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+
+
+
+
 
 public class ControlDialogCita implements ActionListener {
+
+    private static final String PATRON_FECHA = "dd/MM/yyyy";
+    private static final String PATRON_HORA = "HH:mm";
+    private static final SimpleDateFormat FORMATO_FECHA = new SimpleDateFormat(PATRON_FECHA);
+    private static final SimpleDateFormat FORMATO_HORA = new SimpleDateFormat(PATRON_HORA);
 
     private final DialogNuevaCita vista;
     private final RegistroCitas registro;
@@ -39,6 +51,7 @@ public class ControlDialogCita implements ActionListener {
     private final ListaMascotas mascotas;
     private final ListaPersonal personal;
     private final ListaServicios servicios;
+    private final Cita citaEnEdicion;
     private final Map<String, Personal> opcionesPersonal = new HashMap<>();
     private final Map<String, Servicio> opcionesServicios = new HashMap<>();
     private final List<Servicio> serviciosSeleccionados = new ArrayList<>();
@@ -46,66 +59,88 @@ public class ControlDialogCita implements ActionListener {
     private boolean guardadoExitoso;
 
     public ControlDialogCita(DialogNuevaCita vista, RegistroCitas registro, ListaClientes clientes,
-            ListaMascotas mascotas, ListaPersonal personal, ListaServicios servicios) {
+            ListaMascotas mascotas, ListaPersonal personal, ListaServicios servicios, Cita cita) {
         this.vista = vista;
         this.registro = registro;
         this.clientes = clientes;
         this.mascotas = mascotas;
         this.personal = personal;
         this.servicios = servicios;
+        this.citaEnEdicion = cita;
 
+        boolean esNueva = (cita == null);
+        boolean esEditable = esNueva || ProcesosCita.ESTADO_PENDIENTE.equalsIgnoreCase(cita.getEstado());
 
-        vista.btnBuscarMascota.addActionListener(this);
-        vista.txtBuscarMascota.addActionListener(this);
-        vista.btnAgregar1.addActionListener(this); 
-        vista.btnQuitar.addActionListener(this);
-        vista.btnGuardar.addActionListener(this);
-        vista.btnCancelar.addActionListener(this);
-        
-        vista.txtBuscarMascota.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
-            @Override
-            public void removeUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
-            @Override
-            public void changedUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
-        });
-        
         configurarFechas();
-        cargarOpciones();
-        actualizarServicios();
+        registrarEventos(esNueva, esEditable);
+
+        if (esEditable) {
+            cargarOpciones();
+        }
+        if (esNueva) {
+            vista.setTitle("Nueva Cita");
+            actualizarServicios();
+        } else {
+            vista.setTitle((esEditable ? "Editar Cita - " : "Detalle de Cita - ")
+                    + cita.getCodCita() + " (" + cita.getEstado() + ")");
+            cargarDatosCita(cita, esEditable);
+            aplicarPermisosVista(esEditable);
+        }
     }
 
     public boolean isGuardadoExitoso() {
         return guardadoExitoso;
     }
 
+    
+    
+    
+    private void registrarEventos(boolean permitirBuscarMascota, boolean permitirEditar) {
+        vista.btnCancelar.addActionListener(this);
+
+        if (permitirBuscarMascota) {
+            vista.btnBuscarMascota.addActionListener(this);
+            vista.txtBuscarMascota.addActionListener(this);
+            vista.txtBuscarMascota.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
+                @Override
+                public void removeUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
+                @Override
+                public void changedUpdate(DocumentEvent e) { invalidarMascotaSiCambio(); }
+            });
+        }
+
+        if (permitirEditar) {
+            vista.btnAgregar1.addActionListener(this);
+            vista.btnQuitar.addActionListener(this);
+            vista.btnGuardar.addActionListener(this);
+        }
+    }
+
     private void configurarFechas() {
         Date ahora = new Date();
         vista.spinFecha.setModel(new SpinnerDateModel(ahora, null, null, Calendar.DAY_OF_MONTH));
-        vista.spinFecha.setEditor(new javax.swing.JSpinner.DateEditor(vista.spinFecha, "dd/MM/yyyy"));
+        vista.spinFecha.setEditor(new JSpinner.DateEditor(vista.spinFecha, PATRON_FECHA));
         vista.spinHora.setModel(new SpinnerDateModel(ahora, null, null, Calendar.MINUTE));
-        vista.spinHora.setEditor(new javax.swing.JSpinner.DateEditor(vista.spinHora, "HH:mm"));
-        
-        
+        vista.spinHora.setEditor(new JSpinner.DateEditor(vista.spinHora, PATRON_HORA));
         vista.txtTotal.setEditable(false);
     }
 
     private void cargarOpciones() {
         vista.cboPersonal.removeAllItems();
-        NodoPersonal nodoPersonal = personal.ini;
-        while (nodoPersonal != null) {
-            Personal persona = nodoPersonal.personal;
-            if (persona.isActivo() && "Veterinario".equalsIgnoreCase(persona.getCargo())) {
-                String opcion = persona.getCodPersonal() + " - " + persona.getNombres()
-                        + " " + persona.getApellidos();
+        opcionesPersonal.clear();
+        for (NodoPersonal nodo = personal.ini; nodo != null; nodo = nodo.sig) {
+            Personal persona = nodo.personal;
+            if (persona.isActivo() && ProcesosCita.CARGO_VETERINARIO.equalsIgnoreCase(persona.getCargo())) {
+                String opcion = textoPersonal(persona);
                 opcionesPersonal.put(opcion, persona);
                 vista.cboPersonal.addItem(opcion);
             }
-            nodoPersonal = nodoPersonal.sig;
         }
 
         vista.cboServicios.removeAllItems();
+        opcionesServicios.clear();
         for (Servicio servicio : servicios.getServicios()) {
             if (servicio.isActivo()) {
                 String opcion = servicio.getCodServicio() + " - " + servicio.getNombre();
@@ -115,11 +150,99 @@ public class ControlDialogCita implements ActionListener {
         }
     }
 
+    private void cargarDatosCita(Cita cita, boolean esEditable) {
+        vista.txtBuscarMascota.setText(cita.getCodMascota());
+        NodoMascota nodoMascota = mascotas.Buscar(cita.getCodMascota());
+        if (nodoMascota != null) {
+            mascotaSeleccionada = nodoMascota.mascota;
+            NodoCliente nodoCliente = clientes.Buscar(mascotaSeleccionada.getCodCliente());
+            String dueno = (nodoCliente != null)
+                    ? nodoCliente.cliente.getNombres() + " " + nodoCliente.cliente.getApellidos()
+                    : "Cliente no encontrado";
+            vista.txtNombrePaciente.setText(mascotaSeleccionada.getNombre() + " - " + dueno);
+        } else {
+            vista.txtNombrePaciente.setText(cita.getCodMascota());
+        }
+
+        try {
+            vista.spinFecha.setValue(FORMATO_FECHA.parse(cita.getFecha()));
+            vista.spinHora.setValue(FORMATO_HORA.parse(cita.getHora()));
+        } catch (ParseException ex) {
+            Mensajes.Mostrar("La fecha u hora guardada de la cita no es válida. Ingrese una nueva.");
+        }
+
+        cargarVeterinario(cita, esEditable);
+
+        serviciosSeleccionados.clear();
+        for (String codigo : cita.getCodigosServicios()) {
+            Servicio servicio = servicios.Buscar(codigo);
+            if (servicio != null) {
+                if (esEditable && !servicio.isActivo()) {
+                    
+                    
+                    Servicio copiaHistorica = new Servicio(
+                            servicio.getCodServicio(),
+                            servicio.getNombre() + " (Retirado)",
+                            servicio.getDescripcion(),
+                            servicio.getPrecio());
+                    copiaHistorica.setActivo(true);
+                    serviciosSeleccionados.add(copiaHistorica);
+                } else {
+                    serviciosSeleccionados.add(servicio);
+                }
+            } else {
+                Servicio noEncontrado = new Servicio(codigo, "Servicio histórico", "-", 0.0);
+                noEncontrado.setActivo(true);
+                serviciosSeleccionados.add(noEncontrado);
+            }
+        }
+        actualizarServicios();
+
+        
+        if (!esEditable) {
+            vista.txtTotal.setText(formatearMonto(cita.getTotal()));
+        }
+    }
+
+    private void cargarVeterinario(Cita cita, boolean esEditable) {
+        NodoPersonal nodo = personal.Buscar(cita.getCodPersonal());
+        String texto = (nodo != null) ? textoPersonal(nodo.personal) : cita.getCodPersonal();
+
+        if (!esEditable) {
+            vista.cboPersonal.removeAllItems();
+            vista.cboPersonal.addItem(texto);
+            return;
+        }
+        
+        if (nodo != null && !opcionesPersonal.containsKey(texto)) {
+            opcionesPersonal.put(texto, nodo.personal);
+            vista.cboPersonal.addItem(texto);
+        }
+        vista.cboPersonal.setSelectedItem(texto);
+    }
+
+    private void aplicarPermisosVista(boolean esEditable) {
+        vista.txtBuscarMascota.setEditable(false);
+        vista.btnBuscarMascota.setVisible(false);
+
+        vista.spinFecha.setEnabled(esEditable);
+        vista.spinHora.setEnabled(esEditable);
+        vista.cboPersonal.setEnabled(esEditable);
+        vista.cboServicios.setVisible(esEditable);
+        vista.btnAgregar1.setVisible(esEditable);
+        vista.btnQuitar.setVisible(esEditable);
+        vista.btnGuardar.setVisible(esEditable);
+        vista.btnCancelar.setText(esEditable ? "Cancelar" : "Cerrar");
+    }
+
+    
+    
+    
     private void buscarMascota() {
         String dato = vista.txtBuscarMascota.getText().trim();
         mascotaSeleccionada = null;
         vista.txtNombrePaciente.setText("");
-        
+
         if (dato.isBlank()) {
             Mensajes.Mostrar("Ingrese el código de la mascota o el DNI del cliente.");
             return;
@@ -136,16 +259,15 @@ public class ControlDialogCita implements ActionListener {
             Mensajes.Mostrar("No se encontró una mascota ni un cliente activo con ese dato.");
             return;
         }
-        
+
         List<Mascota> mascotasCliente = new ArrayList<>();
         NodoMascota actual = mascotas.BuscarPorCliente(nodoCliente.cliente.getCodCliente()).ini;
-        while (actual != null) {
+        for (; actual != null; actual = actual.sig) {
             if (actual.mascota.isActivo()) {
                 mascotasCliente.add(actual.mascota);
             }
-            actual = actual.sig;
         }
-        
+
         if (mascotasCliente.isEmpty()) {
             Mensajes.Mostrar("El cliente no tiene mascotas activas registradas.");
             return;
@@ -177,6 +299,8 @@ public class ControlDialogCita implements ActionListener {
             Mensajes.Mostrar("La mascota pertenece a un cliente retirado o inexistente.");
             return;
         }
+        
+        
         vista.txtBuscarMascota.setText(mascota.getCodMascota());
         mascotaSeleccionada = mascota;
         vista.txtNombrePaciente.setText(mascota.getNombre() + " - "
@@ -191,9 +315,12 @@ public class ControlDialogCita implements ActionListener {
         }
     }
 
+    
+    
+    
     private void agregarServicio() {
         Object seleccion = vista.cboServicios.getSelectedItem();
-        Servicio servicio = seleccion == null ? null : opcionesServicios.get(seleccion.toString());
+        Servicio servicio = (seleccion == null) ? null : opcionesServicios.get(seleccion.toString());
         if (servicio == null) {
             Mensajes.Mostrar("No hay servicios activos disponibles para agregar.");
             return;
@@ -207,18 +334,18 @@ public class ControlDialogCita implements ActionListener {
     }
 
     private void quitarServicio() {
-        int filaSeleccionada = vista.tablaServicios.getSelectedRow();
-        if (filaSeleccionada >= 0 && filaSeleccionada < serviciosSeleccionados.size()) {
-            serviciosSeleccionados.remove(filaSeleccionada);
-            actualizarServicios();
-        } else {
+        int fila = vista.tablaServicios.getSelectedRow();
+        if (fila < 0 || fila >= serviciosSeleccionados.size()) {
             Mensajes.Mostrar("Seleccione un servicio de la tabla para quitarlo.");
+            return;
         }
+        serviciosSeleccionados.remove(fila);
+        actualizarServicios();
     }
 
     private void actualizarServicios() {
         String[] columnas = {"Código", "Nombre", "Descripción", "Precio (S/)"};
-        javax.swing.table.DefaultTableModel modelo = new javax.swing.table.DefaultTableModel(null, columnas) {
+        DefaultTableModel modelo = new DefaultTableModel(null, columnas) {
             @Override
             public boolean isCellEditable(int fila, int columna) {
                 return false;
@@ -231,70 +358,97 @@ public class ControlDialogCita implements ActionListener {
             total += servicio.getPrecio();
         }
         vista.tablaServicios.setModel(modelo);
-        
-        vista.txtTotal.setText(String.valueOf(total)); 
+        vista.txtTotal.setText(formatearMonto(total));
     }
 
-    private void guardar() throws IOException {
-        
-        
+    
+    
+    
+    private void guardar() {
+        try {
+            if (citaEnEdicion == null) {
+                guardarNuevaCita();
+            } else {
+                guardarEdicion();
+            }
+        } catch (IllegalArgumentException ex) {
+            Mensajes.Mostrar(ex.getMessage());
+        } catch (IOException ex) {
+            Mensajes.Mostrar("No se pudo guardar la cita: " + ex.getMessage());
+        }
+    }
+
+    private void guardarNuevaCita() throws IOException {
         if (mascotaSeleccionada == null) {
             throw new IllegalArgumentException("Debe buscar y seleccionar un paciente válido antes de guardar.");
         }
-        if (serviciosSeleccionados.isEmpty()) {
-            throw new IllegalArgumentException("Debe agregar al menos un servicio a la cita.");
-        }
-        
-        Object opcionPersonal = vista.cboPersonal.getSelectedItem();
-        Personal seleccionado = opcionPersonal == null
-                ? null : opcionesPersonal.get(opcionPersonal.toString());
-        
-        Date fecha = (Date) vista.spinFecha.getValue();
-        Date hora = (Date) vista.spinHora.getValue();
-        String fechaTexto = new SimpleDateFormat("dd/MM/yyyy").format(fecha);
-        String horaTexto = new SimpleDateFormat("HH:mm").format(hora);
-        
-        Cita nueva = ProcesosCita.RegistrarCita(fechaTexto, horaTexto, mascotaSeleccionada,
-                seleccionado, serviciosSeleccionados, servicios,
-                registro.getPendientes(), registro.getHistorial(),
-                clientes, mascotas, personal);
-                
+        Cita nueva = ProcesosCita.registrar(fechaSeleccionada(), horaSeleccionada(), mascotaSeleccionada,
+                personalSeleccionado(), serviciosSeleccionados, clientes,
+                registro.getPendientes(), registro.getHistorial());
         try {
             AlmacenarCitas.Guardar(registro);
         } catch (IOException ex) {
-            ProcesosCita.RevertirRegistro(registro.getPendientes(), nueva.getCodCita());
+            ProcesosCita.revertirRegistro(registro.getPendientes(), nueva.getCodCita());
             throw ex;
         }
-        
+        finalizar("Cita " + nueva.getCodCita() + " registrada correctamente.");
+    }
+
+    private void guardarEdicion() throws IOException {
+        Cita copiaAnterior = ProcesosCita.editar(citaEnEdicion, fechaSeleccionada(), horaSeleccionada(),
+                personalSeleccionado(), serviciosSeleccionados, registro.getPendientes());
+        try {
+            AlmacenarCitas.Guardar(registro);
+        } catch (IOException ex) {
+            ProcesosCita.revertirEdicion(citaEnEdicion, copiaAnterior);
+            throw ex;
+        }
+        finalizar("Cita " + citaEnEdicion.getCodCita() + " actualizada correctamente.");
+    }
+
+    private void finalizar(String mensaje) {
         guardadoExitoso = true;
-        Mensajes.Mostrar("Cita " + nueva.getCodCita() + " registrada correctamente.");
+        Mensajes.Mostrar(mensaje);
         vista.dispose();
+    }
+
+    
+    
+    
+    private String fechaSeleccionada() {
+        return FORMATO_FECHA.format((Date) vista.spinFecha.getValue());
+    }
+
+    private String horaSeleccionada() {
+        return FORMATO_HORA.format((Date) vista.spinHora.getValue());
+    }
+
+    private Personal personalSeleccionado() {
+        Object opcion = vista.cboPersonal.getSelectedItem();
+        return (opcion == null) ? null : opcionesPersonal.get(opcion.toString());
+    }
+
+    private static String textoPersonal(Personal p) {
+        return p.getCodPersonal() + " - " + p.getNombres() + " " + p.getApellidos();
+    }
+
+    private static String formatearMonto(double monto) {
+        return String.format("%.2f", monto);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Object origen = e.getSource();
-        
         if (origen == vista.btnCancelar) {
             vista.dispose();
-            
         } else if (origen == vista.btnBuscarMascota || origen == vista.txtBuscarMascota) {
             buscarMascota();
-            
-        } else if (origen == vista.btnAgregar1) { 
+        } else if (origen == vista.btnAgregar1) {
             agregarServicio();
-            
-        } else if (origen == vista.btnQuitar) { 
+        } else if (origen == vista.btnQuitar) {
             quitarServicio();
-            
         } else if (origen == vista.btnGuardar) {
-            try {
-                guardar();
-            } catch (IllegalArgumentException ex) {
-                Mensajes.Mostrar(ex.getMessage());
-            } catch (IOException ex) {
-                Mensajes.Mostrar("No se pudo guardar la cita: " + ex.getMessage());
-            }
+            guardar();
         }
     }
 }

@@ -1,7 +1,6 @@
 package Controlador;
 
 import Arboles.ArbolCitas;
-import Colas.ColaCitas;
 import Entidades.Cita;
 import EstructuraArrayList.ListaServicios;
 import ListaEnlazadas.ListaClientes;
@@ -13,71 +12,97 @@ import Persistencia.AlmacenarCliente;
 import Persistencia.AlmacenarMascota;
 import Persistencia.AlmacenarPersonal;
 import Persistencia.AlmacenarServicio;
-import Pilas.PilaCitas;
 import Procesos.Mensajes;
 import Procesos.Mostrar;
 import Procesos.ProcesosCita;
+import Procesos.UtilidadesUI;
 import Vista.DialogAtenderCita;
 import Vista.DialogNuevaCita;
 import Vista.pnlCitas;
-import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 public class ControlGestionCitas implements ActionListener {
 
+    private static final String PLACEHOLDER_BUSQUEDA = "Buscar por Código de cita o de mascota";
+    private static final int COL_CODIGO = 0;
+
     private final pnlCitas vista;
     private final RegistroCitas registro;
-    private ListaClientes clientes;
-    private ListaMascotas mascotas;
-    private ListaPersonal personal;
-    private ListaServicios servicios;
-    private Cita encontrado;
+    private Cita citaSeleccionada;
     private ArbolCitas indiceArbol;
+    private boolean ordenAscendente = true;
 
     public ControlGestionCitas(pnlCitas vista) throws IOException, ClassNotFoundException {
         this.vista = vista;
         this.registro = AlmacenarCitas.Recuperar();
-        this.clientes = AlmacenarCliente.Recuperar();
-        this.mascotas = AlmacenarMascota.Recuperar();
-        this.personal = AlmacenarPersonal.Recuperar();
-        this.servicios = AlmacenarServicio.Recuperar();
-        
+
+        registrarEventos();
+        actualizarVista();
+    }
+
+    
+    
+    
+    private void registrarEventos() {
         vista.btnNuevo.addActionListener(this);
         vista.btnBuscar.addActionListener(this);
         vista.txtBuscar.addActionListener(this);
         vista.btnCancelar.addActionListener(this);
         vista.btnAtenderCita.addActionListener(this);
         vista.cboEstado.addActionListener(this);
-        
-        vista.tablaCitas.getSelectionModel().addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting()) {
+        vista.btnOrdenarFecha.addActionListener(this);
+
+        UtilidadesUI.configurarPlaceholder(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
+
+        vista.tablaCitas.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
                 seleccionarDesdeTabla();
             }
         });
-        actualizarVista();
+
+        vista.tablaCitas.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 2) {
+                    return;
+                }
+                int fila = vista.tablaCitas.rowAtPoint(e.getPoint());
+                if (fila >= 0) {
+                    vista.tablaCitas.setRowSelectionInterval(fila, fila);
+                    if (citaSeleccionada != null) {
+                        abrirDialogo(citaSeleccionada);
+                    }
+                }
+            }
+        });
+
+        actualizarTextoOrden();
     }
 
-    private ColaCitas pendientes() {
-        return registro.getPendientes();
-    }
-
-    private PilaCitas historial() {
-        return registro.getHistorial();
-    }
-
+    
+    
+    
     private void actualizarVista() {
-        ProcesosCita.LimpiarEntradas(vista);
-        encontrado = null;
+        UtilidadesUI.restablecerPlaceholder(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
+        indiceArbol = ProcesosCita.construirIndice(registro.getPendientes(), registro.getHistorial());
+        cargarTabla("");
+    }
+
+    private void cargarTabla(String texto) {
         vista.tablaCitas.clearSelection();
-        Mostrar.DatosCitas(vista.tablaCitas, pendientes(), historial(), estadoSeleccionado());
-        
-        
-        indiceArbol = ProcesosCita.ConstruirIndice(pendientes(), historial());
+        Mostrar.DatosCitas(
+                vista.tablaCitas,
+                registro.getPendientes(),
+                registro.getHistorial(),
+                estadoSeleccionado(),
+                texto,
+                ordenAscendente);
+        citaSeleccionada = null;
+        actualizarEstadoBotones();
     }
 
     private String estadoSeleccionado() {
@@ -85,146 +110,141 @@ public class ControlGestionCitas implements ActionListener {
         return estado == null ? "TODOS" : estado.toString();
     }
 
+    private boolean esCitaPendienteSeleccionada() {
+        return citaSeleccionada != null
+                && ProcesosCita.ESTADO_PENDIENTE.equalsIgnoreCase(citaSeleccionada.getEstado());
+    }
+
+    private void actualizarEstadoBotones() {
+        boolean esPendiente = esCitaPendienteSeleccionada();
+        vista.btnAtenderCita.setEnabled(esPendiente);
+        vista.btnCancelar.setEnabled(esPendiente);
+    }
+
     private void seleccionarDesdeTabla() {
         int fila = vista.tablaCitas.getSelectedRow();
         if (fila < 0) {
-            encontrado = null;
-            return;
+            citaSeleccionada = null;
+        } else {
+            int filaModelo = vista.tablaCitas.convertRowIndexToModel(fila);
+            String codigo = String.valueOf(vista.tablaCitas.getModel().getValueAt(filaModelo, COL_CODIGO));
+            citaSeleccionada = indiceArbol.Buscar(codigo);
         }
-        int modelo = vista.tablaCitas.convertRowIndexToModel(fila);
-        String codigo = String.valueOf(vista.tablaCitas.getModel().getValueAt(modelo, 1));
-        
-        
-        encontrado = indiceArbol.Buscar(codigo);
-        
-        if (encontrado != null) {
-            vista.txtBuscar.setText(codigo);
-        }
+        actualizarEstadoBotones();
     }
 
-    private void seleccionarFila(String codigo) {
-        for (int fila = 0; fila < vista.tablaCitas.getRowCount(); fila++) {
-            int modelo = vista.tablaCitas.convertRowIndexToModel(fila);
-            if (codigo.equalsIgnoreCase(String.valueOf(vista.tablaCitas.getModel().getValueAt(modelo, 1)))) {
-                vista.tablaCitas.setRowSelectionInterval(fila, fila);
-                return;
-            }
-        }
-    }
-
-    private void crearCita() {
+    
+    
+    
+    private void abrirDialogo(Cita cita) {
+        ListaClientes clientes;
+        ListaMascotas mascotas;
+        ListaPersonal personal;
+        ListaServicios servicios;
         try {
             clientes = AlmacenarCliente.Recuperar();
             mascotas = AlmacenarMascota.Recuperar();
             personal = AlmacenarPersonal.Recuperar();
             servicios = AlmacenarServicio.Recuperar();
         } catch (IOException | ClassNotFoundException ex) {
-            Mensajes.Mostrar("No se pudieron cargar los datos actuales para registrar una cita: "
-                    + ex.getMessage());
+            Mensajes.Mostrar("Error al cargar datos actualizados: " + ex.getMessage());
             return;
         }
-        Window ventanaPadre = SwingUtilities.getWindowAncestor(vista);
-        Frame framePadre = ventanaPadre instanceof Frame ? (Frame) ventanaPadre : null;
-        DialogNuevaCita dialogo = new DialogNuevaCita(framePadre, true);
-        ControlDialogCita controlador = new ControlDialogCita(dialogo, registro,
-                clientes, mascotas, personal, servicios);
+
+        DialogNuevaCita dialogo = new DialogNuevaCita(UtilidadesUI.obtenerFramePadre(vista), true);
+        ControlDialogCita controlDialogo = new ControlDialogCita(
+                dialogo, registro, clientes, mascotas, personal, servicios, cita);
         dialogo.setVisible(true);
-        if (controlador.isGuardadoExitoso()) {
+
+        if (controlDialogo.isGuardadoExitoso()) {
             actualizarVista();
+        }
+        if (cita != null) {
+            mostrarDiagnosticoSiExiste(cita);
         }
     }
 
+    private void mostrarDiagnosticoSiExiste(Cita cita) {
+        String detalles = cita.getDetallesAtencion();
+        if (ProcesosCita.ESTADO_ATENDIDA.equalsIgnoreCase(cita.getEstado())
+                && detalles != null && !detalles.isBlank()) {
+            Mensajes.Mostrar("Diagnóstico (" + cita.getCodCita() + "):\n\n" + detalles);
+        }
+    }
+
+    private void buscarCita() {
+        String texto = UtilidadesUI.textoBusqueda(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
+        cargarTabla(texto);
+
+        if (!texto.isEmpty() && vista.tablaCitas.getRowCount() == 1) {
+            vista.tablaCitas.setRowSelectionInterval(0, 0);
+        }
+    }
+
+    private void alternarOrdenFecha() {
+        ordenAscendente = !ordenAscendente;
+        actualizarTextoOrden();
+        buscarCita();
+    }
+
+    private void actualizarTextoOrden() {
+        vista.btnOrdenarFecha.setText(ordenAscendente
+                ? "Fecha: Ordenamiento Ascendente"
+                : "Fecha: Ordenamiento Descendente");
+    }
+
     private void atenderCita() {
-        if (encontrado == null) {
-            Mensajes.Mostrar("Seleccione o busque la cita que desea atender.");
+        if (!esCitaPendienteSeleccionada()) {
             return;
         }
-        if (!"Pendiente".equalsIgnoreCase(encontrado.getEstado())) {
-            Mensajes.Mostrar("Solo se pueden atender citas pendientes.");
-            return;
-        }
-        Window ventanaPadre = SwingUtilities.getWindowAncestor(vista);
-        Frame framePadre = ventanaPadre instanceof Frame ? (Frame) ventanaPadre : null;
-        DialogAtenderCita dialogo = new DialogAtenderCita(framePadre, true);
-        ControlDialogAtenderCita controlador = new ControlDialogAtenderCita(
-                dialogo, registro, encontrado);
+        DialogAtenderCita dialogo = new DialogAtenderCita(UtilidadesUI.obtenerFramePadre(vista), true);
+        ControlDialogAtenderCita controlDialogo
+                = new ControlDialogAtenderCita(dialogo, registro, citaSeleccionada);
         dialogo.setVisible(true);
-        if (controlador.isGuardadoExitoso()) {
+
+        if (controlDialogo.isGuardadoExitoso()) {
             actualizarVista();
         }
     }
 
     private void cancelarCita() {
-        if (encontrado == null) {
-            Mensajes.Mostrar("Seleccione o busque la cita que desea cancelar.");
+        if (!esCitaPendienteSeleccionada()) {
             return;
         }
-        if (!"Pendiente".equalsIgnoreCase(encontrado.getEstado())) {
-            Mensajes.Mostrar("Solo se pueden cancelar citas pendientes.");
-            return;
-        }
-        int respuesta = Mensajes.Preguntar("Confirmar cancelación",
-                "¿Desea cancelar la cita " + encontrado.getCodCita() + "?");
-        if (respuesta != JOptionPane.OK_OPTION) {
+        Cita cita = citaSeleccionada;
+
+        if (!Mensajes.Preguntar("Confirmar cancelación",
+                "¿Desea cancelar la cita " + cita.getCodCita() + "?")) {
             return;
         }
 
-        String estadoAnterior = encontrado.getEstado();
-        String detallesAnteriores = encontrado.getDetallesAtencion();
-        Cita cancelada;
-        try {
-            cancelada = ProcesosCita.CancelarCita(pendientes(), historial(), encontrado.getCodCita());
-        } catch (IllegalArgumentException ex) {
-            Mensajes.Mostrar(ex.getMessage());
-            return;
-        }
-        
+        String detallesAnteriores = cita.getDetallesAtencion();
+        Cita cancelada = ProcesosCita.cancelar(registro.getPendientes(), registro.getHistorial(),
+                cita.getCodCita());
         try {
             AlmacenarCitas.Guardar(registro);
             actualizarVista();
             Mensajes.Mostrar("Cita cancelada correctamente.");
         } catch (IOException ex) {
-            ProcesosCita.RestaurarCitaPendiente(pendientes(), historial(), cancelada,
-                    estadoAnterior, detallesAnteriores);
+            ProcesosCita.restaurarPendiente(registro.getPendientes(), registro.getHistorial(),
+                    cancelada, detallesAnteriores);
             Mensajes.Mostrar("No se pudo guardar la cancelación: " + ex.getMessage());
         }
-    }
-
-    private void buscarCita() {
-        String codigo = vista.txtBuscar.getText().trim();
-        encontrado = null;
-        vista.tablaCitas.clearSelection();
-        
-        if (codigo.isBlank() || codigo.equalsIgnoreCase("Buscar por Código")) {
-            return;
-        }
-        
-        
-        encontrado = indiceArbol.Buscar(codigo);
-        
-        if (encontrado == null) {
-            Mensajes.Mostrar("No existe una cita con código " + codigo + ".");
-            return;
-        }
-        seleccionarFila(codigo);
-        Mensajes.Mostrar("Cita encontrada y seleccionada.");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         Object origen = e.getSource();
         if (origen == vista.btnNuevo) {
-            crearCita();
-        } else if (origen == vista.btnBuscar || origen == vista.txtBuscar) {
-            buscarCita();
+            abrirDialogo(null);
         } else if (origen == vista.btnAtenderCita) {
             atenderCita();
         } else if (origen == vista.btnCancelar) {
             cancelarCita();
-        } else if (origen == vista.cboEstado) {
-            encontrado = null;
-            vista.tablaCitas.clearSelection();
-            Mostrar.DatosCitas(vista.tablaCitas, pendientes(), historial(), estadoSeleccionado());
+        } else if (origen == vista.btnOrdenarFecha) {
+            alternarOrdenFecha();
+        } else if (origen == vista.btnBuscar || origen == vista.txtBuscar || origen == vista.cboEstado) {
+            buscarCita();
         }
     }
 }

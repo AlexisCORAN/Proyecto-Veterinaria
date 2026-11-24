@@ -1,142 +1,99 @@
-
 package Procesos;
 
 import Entidades.Personal;
 import ListasDoblesEnlazadas.ListaPersonal;
 import ListasDoblesEnlazadas.NodoPersonal;
-import Vista.DialogNuevoPersonal;
-import Vista.pnlPersonal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-
 
 public class ProcesosPersonal {
 
-    private static final String FORMATO_FECHA = "dd/MM/yyyy";
+    public static void validar(Personal p) {
+        if (p == null) {
+            throw new IllegalArgumentException("Los datos del personal son obligatorios.");
+        }
+        String dni = textoSeguro(p.getDni());
+        String nombres = textoSeguro(p.getNombres());
+        String apellidos = textoSeguro(p.getApellidos());
+        String telefono = textoSeguro(p.getTelefono());
+        String cargo = textoSeguro(p.getCargo());
 
-    public static void LimpiarEntradas(pnlPersonal vista) {
-        vista.txtBuscar.setText("Buscar por Código");
+        if (!dni.matches("\\d{8}")) {
+            throw new IllegalArgumentException("El DNI debe contener exactamente 8 dígitos numéricos.");
+        }
+        if (nombres.isEmpty() || apellidos.isEmpty()) {
+            throw new IllegalArgumentException("Los nombres y apellidos son obligatorios.");
+        }
+        if (!telefono.isEmpty() && !telefono.matches("\\d{7,9}")) {
+            throw new IllegalArgumentException("El teléfono debe contener entre 7 y 9 dígitos.");
+        }
+        if (cargo.isEmpty()) {
+            throw new IllegalArgumentException("Debe seleccionar un cargo válido.");
+        }
     }
 
-    public static Personal LeerPersonalDesdeFormulario(DialogNuevoPersonal vista) {
-        String codigo = vista.txtCodigoPersonal.getText().trim();
-        String dni = vista.txtDniCliente.getText().trim();
-        String nombres = vista.txtNombresCliente.getText().trim();
-        String apellidos = vista.txtApellidosCliente.getText().trim();
-        String telefono = vista.txtTelefonoCliente.getText().trim();
-        Object cargoSeleccionado = vista.cboCargo.getSelectedItem();
-
-        if (dni.isEmpty() || nombres.isEmpty() || apellidos.isEmpty()) {
-            throw new IllegalArgumentException("DNI, nombres y apellidos son obligatorios.");
-        }
-        if (cargoSeleccionado == null || cargoSeleccionado.toString().isBlank()) {
-            throw new IllegalArgumentException("Seleccione el cargo del personal.");
-        }
-
-        String fechaNacimiento = new SimpleDateFormat(FORMATO_FECHA)
-                .format((Date) vista.spinFechaNacimiento.getValue());
-        return new Personal(codigo, dni, nombres, apellidos, telefono, fechaNacimiento,
-                cargoSeleccionado.toString());
-    }
-
-    public static String GenerarCodigo(ListaPersonal lista) {
+    public static String generarCodigo(ListaPersonal lista) {
         List<String> codigos = new ArrayList<>();
-        NodoPersonal actual = lista.ini;
-        while (actual != null) {
+        for (NodoPersonal actual = lista.ini; actual != null; actual = actual.sig) {
             codigos.add(actual.personal.getCodPersonal());
-            actual = actual.sig;
         }
         return GeneradorCodigos.Siguiente("PER-", codigos);
     }
 
-    public static Personal RegistrarPersonal(DialogNuevoPersonal vista, ListaPersonal lista) {
-        Personal datos = LeerPersonalDesdeFormulario(vista);
-        String codigo = GenerarCodigo(lista);
-        vista.txtCodigoPersonal.setText(codigo);
-        Personal nuevo = new Personal(codigo, datos.getDni(), datos.getNombres(),
-                datos.getApellidos(), datos.getTelefono(), datos.getFechaNacimiento(), datos.getCargo());
-        if (lista.Buscar(nuevo.getCodPersonal()) != null) {
-            throw new IllegalArgumentException("Ya existe personal con ese código.");
-        }
-        if (lista.BuscarPorDni(nuevo.getDni()) != null) {
-            throw new IllegalArgumentException("Ya existe personal con ese DNI.");
+    public static void registrar(ListaPersonal lista, Personal nuevo) {
+        validar(nuevo);
+        if (buscarPorDni(lista, nuevo.getDni()) != null) {
+            throw new IllegalArgumentException("Ya existe personal registrado con ese DNI.");
         }
         lista.InsertarFinal(nuevo);
-        return nuevo;
     }
 
-    public static Personal ActualizarPersonalDesdeFormulario(
-            DialogNuevoPersonal vista, ListaPersonal lista, Personal personal) {
-        if (personal == null) {
-            throw new IllegalArgumentException("Debe seleccionar personal para editar.");
+    public static Personal actualizar(ListaPersonal lista, Personal original, Personal datos) {
+        validar(datos);
+        Personal conMismoDni = buscarPorDni(lista, datos.getDni());
+        if (conMismoDni != null && conMismoDni != original) {
+            throw new IllegalArgumentException("El DNI ya está registrado para otro miembro del personal.");
         }
-        Personal datos = LeerPersonalDesdeFormulario(vista);
-        if (!personal.getCodPersonal().equalsIgnoreCase(datos.getCodPersonal())) {
-            throw new IllegalArgumentException("El código del personal no se puede modificar.");
-        }
-        NodoPersonal conDni = lista.BuscarPorDni(datos.getDni());
-        if (conDni != null && conDni.personal != personal) {
-            throw new IllegalArgumentException("El DNI ya está registrado para otra persona.");
-        }
-
-        Personal anterior = Copiar(personal);
-        Aplicar(personal, datos);
-        return anterior;
-    }
-
-    public static boolean DesactivarPersonal(ListaPersonal lista, Personal personal) {
-        if (lista == null || personal == null || !personal.isActivo()) {
-            return false;
-        }
-        NodoPersonal nodo = lista.Buscar(personal.getCodPersonal());
-        return nodo != null && nodo.personal == personal
-                && lista.Desactivar(personal.getCodPersonal());
-    }
-
-    public static void RestaurarEstado(Personal personal, boolean activoAnterior) {
-        personal.setActivo(activoAnterior);
-    }
-
-    public static void RestaurarPersonal(Personal personal, Personal anterior) {
-        Aplicar(personal, anterior);
-        personal.setActivo(anterior.isActivo());
-    }
-
-    public static void MostrarPersonalEnFormulario(DialogNuevoPersonal vista, Personal personal) {
-        vista.txtCodigoPersonal.setEditable(false);
-        vista.txtCodigoPersonal.setText(personal.getCodPersonal());
-        vista.txtDniCliente.setText(personal.getDni());
-        vista.txtNombresCliente.setText(personal.getNombres());
-        vista.txtApellidosCliente.setText(personal.getApellidos());
-        vista.txtTelefonoCliente.setText(personal.getTelefono());
-        vista.cboCargo.setSelectedItem(personal.getCargo());
-        if (personal.getFechaNacimiento() != null && !personal.getFechaNacimiento().isBlank()) {
-            try {
-                Date fecha = new SimpleDateFormat(FORMATO_FECHA).parse(personal.getFechaNacimiento());
-                vista.spinFechaNacimiento.setValue(fecha);
-            } catch (ParseException ex) {
-                throw new IllegalStateException("La fecha de nacimiento guardada no es válida.", ex);
-            }
-        }
-    }
-
-    private static Personal Copiar(Personal personal) {
-        Personal copia = new Personal(personal.getCodPersonal(), personal.getDni(),
-                personal.getNombres(), personal.getApellidos(), personal.getTelefono(),
-                personal.getFechaNacimiento(), personal.getCargo());
-        copia.setActivo(personal.isActivo());
+        Personal copia = copiar(original);
+        copiarDatos(datos, original);
         return copia;
     }
 
-    private static void Aplicar(Personal destino, Personal origen) {
-        destino.setDni(origen.getDni());
-        destino.setNombres(origen.getNombres());
-        destino.setApellidos(origen.getApellidos());
-        destino.setTelefono(origen.getTelefono());
+    public static void revertir(Personal personal, Personal copiaAnterior) {
+        copiarDatos(copiaAnterior, personal);
+    }
+
+    public static boolean desactivar(ListaPersonal lista, Personal personal) {
+        return personal.isActivo() && lista.Desactivar(personal.getCodPersonal());
+    }
+
+    private static Personal buscarPorDni(ListaPersonal lista, String dni) {
+        String dniBuscado = textoSeguro(dni);
+        for (NodoPersonal actual = lista.ini; actual != null; actual = actual.sig) {
+            if (textoSeguro(actual.personal.getDni()).equalsIgnoreCase(dniBuscado)) {
+                return actual.personal;
+            }
+        }
+        return null;
+    }
+
+    private static void copiarDatos(Personal origen, Personal destino) {
+        destino.setDni(textoSeguro(origen.getDni()));
+        destino.setNombres(textoSeguro(origen.getNombres()));
+        destino.setApellidos(textoSeguro(origen.getApellidos()));
+        destino.setTelefono(textoSeguro(origen.getTelefono()));
         destino.setFechaNacimiento(origen.getFechaNacimiento());
-        destino.setCargo(origen.getCargo());
+        destino.setCargo(textoSeguro(origen.getCargo()));
+    }
+
+    private static Personal copiar(Personal p) {
+        Personal copia = new Personal(p.getCodPersonal(), p.getDni(), p.getNombres(),
+                p.getApellidos(), p.getTelefono(), p.getFechaNacimiento(), p.getCargo());
+        copia.setActivo(p.isActivo());
+        return copia;
+    }
+
+    private static String textoSeguro(String valor) {
+        return valor == null ? "" : valor.trim();
     }
 }

@@ -47,10 +47,6 @@ public class Cita implements Serializable {
             String.join(", ", getCodigosServicios()), total, detallesAtencion};
     }
 
-    public Object[] RegistroHistorial(int num) {
-        return new Object[]{num, codCita, fecha, hora, estado, codMascota, codPersonal,
-            String.join(", ", getCodigosServicios()), total, detallesAtencion};
-    }
 
     public String getCodCita() {
         return codCita;

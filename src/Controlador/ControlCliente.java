@@ -7,46 +7,77 @@ import Persistencia.AlmacenarCliente;
 import Procesos.Mensajes;
 import Procesos.Mostrar;
 import Procesos.ProcesosCliente;
+import Procesos.UtilidadesUI;
 import Vista.DialogNuevoCliente;
 import Vista.pnlClientes;
-import java.awt.Frame;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 public class ControlCliente implements ActionListener {
 
+    private static final String PLACEHOLDER_BUSQUEDA = "Buscar por Código, DNI o Nombre";
+    private static final int COL_CODIGO = 1;
+
     private final pnlClientes vista;
     private final ListaClientes lista;
-    private NodoCliente encontrado;
+    private Cliente clienteSeleccionado;
 
     public ControlCliente(pnlClientes vista) throws IOException, ClassNotFoundException {
         this.vista = vista;
         this.lista = AlmacenarCliente.Recuperar();
 
-        this.vista.btnNuevo.addActionListener(this);
-        this.vista.btnEdicionCliente.addActionListener(this);
-        this.vista.btnEstadoCliente.addActionListener(this);
-        this.vista.btnBuscar.addActionListener(this);
-        this.vista.txtBuscar.addActionListener(this);
-        this.vista.cboEstado.addActionListener(this);
-        this.vista.tablaClientes.getSelectionModel().addListSelectionListener(event -> {
-            if (!event.getValueIsAdjusting()) {
+        registrarEventos();
+        cargarTabla("");
+    }
+
+
+    private void registrarEventos() {
+        vista.btnNuevo.addActionListener(this);
+        vista.btnEdicionCliente.addActionListener(this);
+        vista.btnEstadoCliente.addActionListener(this);
+        vista.btnBuscar.addActionListener(this);
+        vista.txtBuscar.addActionListener(this);
+        vista.cboEstado.addActionListener(this);
+
+        UtilidadesUI.configurarPlaceholder(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
+
+        vista.tablaClientes.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
                 seleccionarClienteDeTabla();
             }
         });
 
-        ActualizarVista();
+        vista.tablaClientes.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 2) {
+                    return;
+                }
+                int fila = vista.tablaClientes.rowAtPoint(e.getPoint());
+                if (fila >= 0) {
+                    vista.tablaClientes.setRowSelectionInterval(fila, fila);
+                    if (clienteSeleccionado != null) {
+                        abrirDialogo(clienteSeleccionado);
+                    }
+                }
+            }
+        });
     }
 
-    private void ActualizarVista() {
-        ProcesosCliente.LimpiarEntradas(vista);
-        encontrado = null;
+
+    private void actualizarVista() {
+        UtilidadesUI.restablecerPlaceholder(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
+        cargarTabla("");
+    }
+
+    private void cargarTabla(String texto) {
         vista.tablaClientes.clearSelection();
-        Mostrar.DatosClientes(vista.tablaClientes, lista, estadoSeleccionado());
+        Mostrar.DatosClientes(vista.tablaClientes, lista, estadoSeleccionado(), texto);
+        clienteSeleccionado = null;
+        actualizarEstadoBotones();
     }
 
     private String estadoSeleccionado() {
@@ -54,113 +85,79 @@ public class ControlCliente implements ActionListener {
         return estado == null ? "TODOS" : estado.toString();
     }
 
+    private void actualizarEstadoBotones() {
+        boolean haySeleccion = clienteSeleccionado != null;
+        vista.btnEdicionCliente.setEnabled(haySeleccion);
+        vista.btnEstadoCliente.setEnabled(haySeleccion && clienteSeleccionado.isActivo());
+    }
+
     private void seleccionarClienteDeTabla() {
-        int filaSeleccionada = vista.tablaClientes.getSelectedRow();
-        if (filaSeleccionada < 0) {
-            encontrado = null;
-            return;
-        }
-
-        int filaModelo = vista.tablaClientes.convertRowIndexToModel(filaSeleccionada);
-        String codigo = String.valueOf(vista.tablaClientes.getModel().getValueAt(filaModelo, 1));
-        encontrado = lista.Buscar(codigo);
-        ProcesosCliente.MostrarEnFormulario(vista, encontrado == null ? null : encontrado.cliente);
-    }
-
-    private void seleccionarFila(String codigo) {
-        for (int fila = 0; fila < vista.tablaClientes.getRowCount(); fila++) {
+        int fila = vista.tablaClientes.getSelectedRow();
+        if (fila < 0) {
+            clienteSeleccionado = null;
+        } else {
             int filaModelo = vista.tablaClientes.convertRowIndexToModel(fila);
-            Object valor = vista.tablaClientes.getModel().getValueAt(filaModelo, 1);
-            if (codigo.equalsIgnoreCase(String.valueOf(valor))) {
-                vista.tablaClientes.setRowSelectionInterval(fila, fila);
-                return;
-            }
+            String codigo = String.valueOf(vista.tablaClientes.getModel().getValueAt(filaModelo, COL_CODIGO));
+            NodoCliente nodo = lista.Buscar(codigo);
+            clienteSeleccionado = (nodo == null) ? null : nodo.cliente;
         }
+        actualizarEstadoBotones();
     }
+
 
     private void abrirDialogo(Cliente clienteEdicion) {
-        Window ventanaPadre = SwingUtilities.getWindowAncestor(vista);
-        Frame framePadre = ventanaPadre instanceof Frame ? (Frame) ventanaPadre : null;
-        DialogNuevoCliente dialogo = new DialogNuevoCliente(framePadre, true);
-        ControlDialogCliente controlador = new ControlDialogCliente(dialogo, lista, clienteEdicion);
+        DialogNuevoCliente dialogo = new DialogNuevoCliente(UtilidadesUI.obtenerFramePadre(vista), true);
+        ControlDialogCliente controlDialogo = new ControlDialogCliente(dialogo, lista, clienteEdicion);
         dialogo.setVisible(true);
 
-        if (controlador.isGuardadoExitoso()) {
-            ActualizarVista();
+        if (controlDialogo.isGuardadoExitoso()) {
+            actualizarVista();
         }
     }
 
     private void buscarCliente() {
-        String codigo = vista.txtBuscar.getText().trim();
-        encontrado = null;
-        vista.tablaClientes.clearSelection();
+        String texto = UtilidadesUI.textoBusqueda(vista.txtBuscar, PLACEHOLDER_BUSQUEDA);
+        cargarTabla(texto);
 
-        if (codigo.isEmpty() || codigo.equalsIgnoreCase("Buscar por Código")) {
-            return;
+        if (!texto.isEmpty() && vista.tablaClientes.getRowCount() == 1) {
+            vista.tablaClientes.setRowSelectionInterval(0, 0);
         }
-
-        encontrado = lista.Buscar(codigo);
-        if (encontrado == null) {
-            Mensajes.Mostrar("El código " + codigo + " no existe en la lista.");
-            return;
-        }
-
-        ProcesosCliente.MostrarEnFormulario(vista, encontrado.cliente);
-        seleccionarFila(encontrado.cliente.getCodCliente());
-        Mensajes.Mostrar("Cliente encontrado y seleccionado.");
     }
 
     private void desactivarCliente() {
-        if (encontrado == null) {
-            Mensajes.Mostrar("Seleccione o busque el cliente que desea dar de baja.");
+        Cliente cliente = clienteSeleccionado;
+
+        if (!Mensajes.Preguntar("Confirmar baja",
+                "¿Desea dar de baja al cliente con código " + cliente.getCodCliente() + "?")) {
             return;
         }
 
-        Cliente cliente = encontrado.cliente;
-        String codigo = cliente.getCodCliente();
-        boolean activoAnterior = cliente.isActivo();
-        int respuesta = Mensajes.Preguntar("Confirmar baja",
-                "¿Desea dar de baja al cliente con código " + codigo + "?");
-        if (respuesta != JOptionPane.OK_OPTION) {
-            return;
-        }
-
-        if (!ProcesosCliente.DesactivarCliente(lista, cliente)) {
-            Mensajes.Mostrar(cliente.isActivo()
-                    ? "No se pudo dar de baja al cliente."
-                    : "El cliente ya se encuentra retirado.");
+        if (!ProcesosCliente.desactivar(lista, cliente)) {
+            Mensajes.Mostrar("No se pudo dar de baja al cliente.");
             return;
         }
 
         try {
             AlmacenarCliente.Guardar(lista);
-            ActualizarVista();
+            actualizarVista();
             Mensajes.Mostrar("Cliente dado de baja correctamente.");
         } catch (IOException ex) {
-            ProcesosCliente.RestaurarEstado(cliente, activoAnterior);
+            cliente.setActivo(true); 
             Mensajes.Mostrar("No se pudo guardar la baja del cliente: " + ex.getMessage());
         }
     }
-
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         Object origen = e.getSource();
         if (origen == vista.btnNuevo) {
             abrirDialogo(null);
         } else if (origen == vista.btnEdicionCliente) {
-            if (encontrado == null) {
-                Mensajes.Mostrar("Seleccione o busque el cliente que desea editar.");
-            } else {
-                abrirDialogo(encontrado.cliente);
-            }
-        } else if (origen == vista.btnBuscar || origen == vista.txtBuscar) {
-            buscarCliente();
+            abrirDialogo(clienteSeleccionado);
         } else if (origen == vista.btnEstadoCliente) {
             desactivarCliente();
-        } else if (origen == vista.cboEstado) {
-            encontrado = null;
-            vista.tablaClientes.clearSelection();
-            Mostrar.DatosClientes(vista.tablaClientes, lista, estadoSeleccionado());
+        } else if (origen == vista.btnBuscar || origen == vista.txtBuscar || origen == vista.cboEstado) {
+            buscarCliente();
         }
     }
 }
