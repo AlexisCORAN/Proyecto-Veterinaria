@@ -42,4 +42,3 @@ public class ColaCitas implements Serializable {
 
     public List<Cita> getCitas() { return new ArrayList<>(cola); }
 }
-
