@@ -8,28 +8,20 @@ import java.util.List;
 import java.util.Stack;
 
 public class PilaCitas implements Serializable {
-
     private static final long serialVersionUID = 1L;
     private final Stack<Cita> pila = new Stack<>();
 
     public void Apilar(Cita cita) {
         if (cita == null) {
             throw new IllegalArgumentException("La cita no puede ser nula.");
-        }
-        pila.push(cita);
+        } pila.push(cita);
     }
 
-    public Cita Desapilar() {
-        return pila.isEmpty() ? null : pila.pop();
-    }
+    public Cita Desapilar() { return pila.isEmpty() ? null : pila.pop(); }
 
-    public Cita VerTope() {
-        return pila.isEmpty() ? null : pila.peek();
-    }
+    public Cita VerTope() { return pila.isEmpty() ? null : pila.peek(); }
 
-    public int Cantidad() {
-        return pila.size();
-    }
+    public int Cantidad() { return pila.size(); }
 
     public List<Cita> getCitas() {
         List<Cita> lista = new ArrayList<>(pila);

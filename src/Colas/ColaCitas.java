@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-
 public class ColaCitas implements Serializable {
     private static final long serialVersionUID = 1L;
     private final LinkedList<Cita> cola = new LinkedList<>();
@@ -26,8 +25,7 @@ public class ColaCitas implements Serializable {
             if (c.getCodCita().equalsIgnoreCase(codigo)) {
                 return c;
             }
-        }
-        return null;
+        } return null;
     }
 
     public boolean Eliminar(String codigo) {
@@ -37,11 +35,11 @@ public class ColaCitas implements Serializable {
                 it.remove();
                 return true;
             }
-        }
-        return false;
+        } return false;
     }
 
     public int Cantidad() { return cola.size(); }
 
     public List<Cita> getCitas() { return new ArrayList<>(cola); }
 }
+
