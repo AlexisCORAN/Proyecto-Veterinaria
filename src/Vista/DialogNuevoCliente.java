@@ -85,9 +85,9 @@ public class DialogNuevoCliente extends javax.swing.JDialog {
         nombrePanel.setText("Información Personal");
         nombrePanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
         nombrePanel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        nombrePanel.setMaximumSize(new java.awt.Dimension(250, 30));
-        nombrePanel.setMinimumSize(new java.awt.Dimension(250, 30));
-        nombrePanel.setPreferredSize(new java.awt.Dimension(250, 30));
+        nombrePanel.setMaximumSize(new java.awt.Dimension(32767, 35));
+        nombrePanel.setMinimumSize(new java.awt.Dimension(250, 35));
+        nombrePanel.setPreferredSize(new java.awt.Dimension(350, 35));
         panelSuperior.add(nombrePanel);
 
         panelPrincipal.add(panelSuperior, java.awt.BorderLayout.NORTH);

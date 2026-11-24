@@ -46,8 +46,6 @@ public class DialogAtenderCita extends javax.swing.JDialog {
         lblCodigoCita = new javax.swing.JLabel();
         filler8 = new javax.swing.Box.Filler(new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0));
         txtCodigoCita = new javax.swing.JTextField();
-        panelRowTelefono = new javax.swing.JPanel();
-        filler16 = new javax.swing.Box.Filler(new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0), new java.awt.Dimension(15, 0));
         jScrollPane1 = new javax.swing.JScrollPane();
         txtAreaCita = new javax.swing.JTextArea();
         panelInferior = new javax.swing.JPanel();
@@ -69,9 +67,9 @@ public class DialogAtenderCita extends javax.swing.JDialog {
         nombrePanel.setText("Atención");
         nombrePanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
         nombrePanel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        nombrePanel.setMaximumSize(new java.awt.Dimension(250, 30));
-        nombrePanel.setMinimumSize(new java.awt.Dimension(250, 30));
-        nombrePanel.setPreferredSize(new java.awt.Dimension(250, 30));
+        nombrePanel.setMaximumSize(new java.awt.Dimension(32767, 35));
+        nombrePanel.setMinimumSize(new java.awt.Dimension(350, 35));
+        nombrePanel.setPreferredSize(new java.awt.Dimension(350, 35));
         panelSuperior.add(nombrePanel);
 
         panelPrincipal.add(panelSuperior, java.awt.BorderLayout.NORTH);
@@ -109,17 +107,6 @@ public class DialogAtenderCita extends javax.swing.JDialog {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         panelDatosMascota.add(panelRowCodigo, gridBagConstraints);
-
-        panelRowTelefono.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 20, 5, 20));
-        panelRowTelefono.setOpaque(false);
-        panelRowTelefono.setLayout(new javax.swing.BoxLayout(panelRowTelefono, javax.swing.BoxLayout.X_AXIS));
-        panelRowTelefono.add(filler16);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        panelDatosMascota.add(panelRowTelefono, gridBagConstraints);
 
         panelCentral.add(panelDatosMascota, java.awt.BorderLayout.NORTH);
 
@@ -199,7 +186,6 @@ public class DialogAtenderCita extends javax.swing.JDialog {
     public javax.swing.JButton btnCancelar;
     public javax.swing.JButton btnGuardar;
     private javax.swing.Box.Filler filler1;
-    private javax.swing.Box.Filler filler16;
     private javax.swing.Box.Filler filler7;
     private javax.swing.Box.Filler filler8;
     private javax.swing.JScrollPane jScrollPane1;
@@ -210,7 +196,6 @@ public class DialogAtenderCita extends javax.swing.JDialog {
     private javax.swing.JPanel panelInferior;
     private javax.swing.JPanel panelPrincipal;
     private javax.swing.JPanel panelRowCodigo;
-    private javax.swing.JPanel panelRowTelefono;
     private javax.swing.JPanel panelSuperior;
     public javax.swing.JTextArea txtAreaCita;
     public javax.swing.JTextField txtCodigoCita;

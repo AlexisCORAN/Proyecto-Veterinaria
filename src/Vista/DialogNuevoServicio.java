@@ -74,12 +74,12 @@ public class DialogNuevoServicio extends javax.swing.JDialog {
         panelSuperior.setLayout(new javax.swing.BoxLayout(panelSuperior, javax.swing.BoxLayout.X_AXIS));
 
         nombrePanel.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        nombrePanel.setText("Información Personal");
+        nombrePanel.setText("Nuevo Servicio");
         nombrePanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(20, 20, 20, 20));
         nombrePanel.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
-        nombrePanel.setMaximumSize(new java.awt.Dimension(250, 30));
-        nombrePanel.setMinimumSize(new java.awt.Dimension(250, 30));
-        nombrePanel.setPreferredSize(new java.awt.Dimension(250, 30));
+        nombrePanel.setMaximumSize(new java.awt.Dimension(32767, 35));
+        nombrePanel.setMinimumSize(new java.awt.Dimension(350, 35));
+        nombrePanel.setPreferredSize(new java.awt.Dimension(350, 35));
         panelSuperior.add(nombrePanel);
 
         panelPrincipal.add(panelSuperior, java.awt.BorderLayout.NORTH);
